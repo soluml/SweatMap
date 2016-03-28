@@ -1,0 +1,29 @@
+{
+  "name": "SweatMap",
+  "description": "SweatMap is a utility that rewrites takes in strings as keys and makes them as small as possible.",
+  "version": "0.0.0",
+  "author": {
+    "name": "Benjamin Solum",
+    "url": "http://soluml.com"
+  },
+  "preferGlobal": true,
+  "keywords": [
+    "sweat",
+    "sweatmap",
+    "sweat map",
+    "sweatmap javascript",
+    "sweatmap.js",
+    "minify",
+    "obfuscate",
+    "optimize",
+    "css"
+  ],
+  "readmeFilename": "README.md",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/soluml/sweatmap.git"
+  },
+  "scripts": {
+      "start": "node dist"
+  }
+}
