@@ -123,7 +123,7 @@ module.exports = class SweatMap {
             "Arabic Presentation Forms-B": { start: 'FE70', end: 'FEFF' },
             "Halfwidth and Fullwidth Forms": { start: 'FF00', end: 'FFEF' },
             "Specials": { start: 'FFF0', end: 'FFFF' }
-        }, (additional_ranges || {}));
+        }, additional_ranges);
         
         //Add existing strings to map
         Object.keys(existing_strings || {}).forEach(key => {
