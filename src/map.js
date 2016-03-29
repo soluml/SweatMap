@@ -1,15 +1,18 @@
 'use strict';
 
 module.exports = class SweatMap {
-    constructor() {
+    constructor(existing_strings, additional_ranges) {
         //Map containing original string to obfuscated string values
-        this.data = new Map();
+        this.fmap = new Map();
+        
+        //Map containing obfuscated string to original string values
+        this.rmap = new Map();
         
         //Available characters keyed by number of bytes
         this.characters = {};
 
         //Default Ranges
-        const DefaultRanges = {
+        const DefaultRanges = Object.assign({
             //http://jrgraphix.net/research/unicode_blocks.php
             //http://en.wikipedia.org/wiki/List_of_Unicode_characters
             "A-Z": { start: '41', end: '5A' },
@@ -120,10 +123,16 @@ module.exports = class SweatMap {
             "Arabic Presentation Forms-B": { start: 'FE70', end: 'FEFF' },
             "Halfwidth and Fullwidth Forms": { start: 'FF00', end: 'FFEF' },
             "Specials": { start: 'FFF0', end: 'FFFF' }
-        };
+        }, (additional_ranges || {}));
+        
+        //Add existing strings to map
+        Object.keys(existing_strings || {}).forEach(key => {
+            this.fmap.set(key, existing_strings[key]);
+            this.rmap.set(existing_strings[key], key);
+        });
 
         //Build chars array.
-        Object.keys(DefaultRanges).forEach(function(CR) {
+        Object.keys(DefaultRanges).forEach(CR => {
             for(let i = parseInt(DefaultRanges[CR].start, 16); i <= parseInt(DefaultRanges[CR].end, 16); i++) {
                 try {
                     var char  = String.fromCharCode(i),
@@ -141,18 +150,57 @@ module.exports = class SweatMap {
     }
 
     set(key) {
+        var bytes    = 0,
+            keys     = Object.keys(this.characters),
+            counters = keys.map(() => [0]),
+            value    = '';
+
+        const getCharacter = () => {
+            console.log( keys.indexOf() );
+            
+            
+            console.log( counters );
+            
+            
+            return 'a';
+            
+            
+        };
+
         if(typeof key == 'string') {
+            //Set Value
+            do {
+                bytes++;
+                value += getCharacter();
+            } while (this.has_obfuscated(value));
 
+            //Set maps
+            this.fmap.set(key, value);
+            this.rmap.set(value, key);
 
-
-
-
-            this.data.set(key, 'value');
+            return value;
         } else
             throw new Error('SweatMap keys must be strings.');
     }
+    
+    has_original(key) {
+        return this.fmap.has(key);
+    }
+    
+    has_obfuscated(value) {
+        return this.rmap.has(value);
+    }
 
     entries() {
-        return this.data.entries();
+        return this.fmap.entries();
+    }
+    
+    delete(key) {
+        const value = this.fmap.get(key);
+        
+        if(value !== undefined) {
+            this.fmap.delete(key);
+            this.rmap.delete(value);
+        }
     }
 };
