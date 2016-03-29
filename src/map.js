@@ -15,9 +15,7 @@ module.exports = class SweatMap {
         const Ranges = Object.assign({
             //http://jrgraphix.net/research/unicode_blocks.php
             //http://en.wikipedia.org/wiki/List_of_Unicode_characters
-            "A-Z": { start: '41', end: '5A' },
-            "a-z": { start: '61', end: '7A' },
-
+            "Basic Latin": { start: '0020', end: '007F' },
             "Latin-1 Supplement": { start: '00A0', end: '00FF' },
             "Latin Extended-A": { start: '0100', end: '017F' },
             "Latin Extended-B": { start: '0180', end: '024F' },
@@ -78,7 +76,6 @@ module.exports = class SweatMap {
             "Optical Character Recognition": { start: '2440', end: '245F' },
             "Enclosed Alphanumerics": { start: '2460', end: '24FF' },
             "Box Drawing": { start: '2500', end: '257F' },
-
             "Block Elements": { start: '2580', end: '259F' },
             "Geometric Shapes": { start: '25A0', end: '25FF' },
             "Miscellaneous Symbols": { start: '2600', end: '26FF' },
@@ -133,6 +130,9 @@ module.exports = class SweatMap {
 
         //Build chars array.
         Object.keys(Ranges).forEach(CR => {
+            if(Ranges[CR].start == undefined || Ranges[CR].end == undefined)
+                return;
+            
             for(let i = parseInt(Ranges[CR].start, 16); i <= parseInt(Ranges[CR].end, 16); i++) {
                 try {
                     var char  = String.fromCharCode(i),
@@ -141,7 +141,9 @@ module.exports = class SweatMap {
                     if(!this.characters[bytes])
                         this.characters[bytes] = [];
 
-                    this.characters[bytes].push(char);
+                    //Make sure characters are unique before insertion
+                    if(this.characters[bytes].indexOf(char) == -1)
+                        this.characters[bytes].push(char);
                 } catch(e) {
                     //Character contains lone surrogates, should be avoided -> https://mathiasbynens.be/notes/javascript-unicode
                 }
@@ -150,6 +152,11 @@ module.exports = class SweatMap {
     }
 
     set(key) {
+        //If it's already been done, don't do it again!
+        if(this.fmap.has(key))
+            return this.fmap.get(key);
+        
+        
         var bytes    = 1,
             pcounter = 0,
             value    = '';
