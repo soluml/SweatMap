@@ -1,4 +1,5 @@
 'use strict';
+var uniq = require('lodash.uniq');
 
 module.exports = class SweatMap {
     constructor(existing_strings, additional_ranges) {
@@ -141,13 +142,16 @@ module.exports = class SweatMap {
                     if(!this.characters[bytes])
                         this.characters[bytes] = [];
 
-                    //Make sure characters are unique before insertion
-                    if(this.characters[bytes].indexOf(char) == -1)
-                        this.characters[bytes].push(char);
+                    this.characters[bytes].push(char);
                 } catch(e) {
                     //Character contains lone surrogates, should be avoided -> https://mathiasbynens.be/notes/javascript-unicode
                 }
             }
+        });
+        
+        //Removes duplicate chars in the array
+        Object.keys(this.characters).forEach(C => {
+            this.characters[C] = uniq(this.characters[C]);
         });
     }
 

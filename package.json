@@ -24,6 +24,9 @@
     "url": "git://github.com/soluml/sweatmap.git"
   },
   "scripts": {
-      "start": "node dist"
+    "start": "node dist"
+  },
+  "dependencies": {
+    "lodash.uniq": "^4.2.0"
   }
 }
