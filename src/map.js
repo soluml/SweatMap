@@ -12,7 +12,7 @@ module.exports = class SweatMap {
         this.characters = {};
 
         //Default Ranges
-        const DefaultRanges = Object.assign({
+        const Ranges = Object.assign({
             //http://jrgraphix.net/research/unicode_blocks.php
             //http://en.wikipedia.org/wiki/List_of_Unicode_characters
             "A-Z": { start: '41', end: '5A' },
@@ -132,8 +132,8 @@ module.exports = class SweatMap {
         });
 
         //Build chars array.
-        Object.keys(DefaultRanges).forEach(CR => {
-            for(let i = parseInt(DefaultRanges[CR].start, 16); i <= parseInt(DefaultRanges[CR].end, 16); i++) {
+        Object.keys(Ranges).forEach(CR => {
+            for(let i = parseInt(Ranges[CR].start, 16); i <= parseInt(Ranges[CR].end, 16); i++) {
                 try {
                     var char  = String.fromCharCode(i),
                         bytes = unescape(encodeURI(char)).length; //utf8 length -> https://gist.github.com/mathiasbynens/1010324
@@ -150,29 +150,90 @@ module.exports = class SweatMap {
     }
 
     set(key) {
-        var bytes    = 0,
-            keys     = Object.keys(this.characters),
-            counters = keys.map(() => [0]),
+        var bytes    = 1,
+            pcounter = 0,
             value    = '';
+        
+        const getPatterns = () => {
+            function makeObject(reference) {
+                return {
+                    chars: reference,
+                    counter: 0
+                };
+            }
 
-        const getCharacter = () => {
-            console.log( keys.indexOf() );
-            
-            
-            console.log( counters );
-            
-            
-            return 'a';
-            
-            
+            //Hard Coded For Now
+            if(bytes === 1) {
+                return [
+                    [makeObject(this.characters['1'])] //A
+                ];
+            } else if(bytes == 2) {
+                return [
+                    [makeObject(this.characters['1']), makeObject(this.characters['1'])], //AA
+                    [makeObject(this.characters['2'])] //B
+                ];
+            } else if(bytes == 3) {
+                return [
+                    [makeObject(this.characters['1']), makeObject(this.characters['1']), makeObject(this.characters['1'])], //AAA
+                    [makeObject(this.characters['2']), makeObject(this.characters['1'])], //BA
+                    [makeObject(this.characters['1']), makeObject(this.characters['2'])], //AB
+                    [makeObject(this.characters['3'])] //C
+                ];
+            }
+            //
         };
 
         if(typeof key == 'string') {
             //Set Value
             do {
-                bytes++;
-                value += getCharacter();
-            } while (this.has_obfuscated(value));
+                
+                
+                
+                let patterns = getPatterns();
+            
+                
+                
+                
+                patterns[pcounter].forEach(pattern => {
+                    
+                    
+                    
+                    value += pattern.chars[pattern.counter];
+                    pattern.counter++;
+                    
+                    
+                    
+                    
+                });
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+            
+                //If we run out of patterns to try, add a byte and try again
+                if(!patterns.length) {
+                    bytes++;
+                    pcounter = 0;
+                }
+                
+                
+                
+                
+                
+                
+                
+                
+            } while(this.has_obfuscated(value));
 
             //Set maps
             this.fmap.set(key, value);
