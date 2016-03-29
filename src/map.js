@@ -136,7 +136,7 @@ module.exports = class SweatMap {
             
             for(let i = parseInt(Ranges[CR].start, 16); i <= parseInt(Ranges[CR].end, 16); i++) {
                 try {
-                    var char  = String.fromCharCode(i),
+                    let char  = String.fromCharCode(i),
                         bytes = unescape(encodeURI(char)).length; //utf8 length -> https://gist.github.com/mathiasbynens/1010324
 
                     if(!this.characters[bytes])
@@ -153,6 +153,8 @@ module.exports = class SweatMap {
         Object.keys(this.characters).forEach(C => {
             this.characters[C] = uniq(this.characters[C]);
         });
+        
+        console.log(this.characters['1'].length, this.characters['2'].length, this.characters['3'].length);
     }
 
     set(key) {
