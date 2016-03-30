@@ -1,15 +1,16 @@
 var path = require('path');
 var webpack = require('webpack');
-var isProd = (process.env.NODE_ENV == 'production' ? true : false);
+var isBabel = (process.env.NODE_ENV == 'babel' ? true : false);
+var isProd = (process.env.NODE_ENV == 'production' || isBabel ? true : false);
 var packageJSON = require('./package.json');
 
 module.exports = {
     entry: {
-        'sweatmap': ['./src/map.js']
+        'sweatmap': ['./src/map.js'],
     },
     output: {
         path: 'dist',
-		filename: '[name]-'+ packageJSON.version + (isProd ? '.min' : '') +'.js'
+		filename: '[name]-'+ (isBabel ? 'babel-' : '') + packageJSON.version + (isProd ? '.min' : '') +'.js'
     },
     debug: true,
     devtool: isProd ? 'false' : 'source-map',
@@ -17,7 +18,7 @@ module.exports = {
         root: [ path.resolve('src') ]
     },
     module: {
-        loaders: [
+        loaders: [].concat(isBabel ? [
             {
                 test: /src\/.*\.js$/,
                 loader: 'babel-loader',
@@ -25,18 +26,18 @@ module.exports = {
                     presets: ['es2015']
                 },
                 exclude: /(node_modules|js\/lib)/
-            },
-        ]
+            }
+        ] : [])
     },
-    plugins: [
+    plugins: [].concat(isProd ? [
         new webpack.optimize.UglifyJsPlugin({
             minimize: true,
-            comments: isProd ? false : undefined,
-            sourceMap: isProd ? false : true,
-            sourceMapIncludeSources: isProd ? false : true,
-            compress: isProd ? { drop_console: true } : false,
-            mangle: isProd ? {} : false
-        }),
-    ],
+            comments: false,
+            sourceMap: false,
+            sourceMapIncludeSources: false,
+            compress: { drop_console: true },
+            mangle: {}
+        })
+    ] : []),
     node: { fs: "empty" }
 };
