@@ -1,7 +1,7 @@
 'use strict';
-var uniq = require('lodash.uniq');
+const uniq = require('lodash.uniq');
 
-module.exports = class SweatMap {
+const SweatMap = class SweatMap {
     constructor(existing_strings, additional_ranges) {
         //Map containing original string to obfuscated string values
         this.fmap = new Map();
@@ -269,3 +269,10 @@ module.exports = class SweatMap {
         }
     }
 };
+
+
+//Export SweatMap for Browsers and CommonJS
+if(typeof window === 'object')
+    window.SweatMap = SweatMap;
+if(typeof module === 'object' && module.exports)
+    module.exports = SweatMap;

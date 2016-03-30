@@ -1,6 +1,6 @@
 {
   "name": "SweatMap",
-  "description": "SweatMap is a utility that rewrites takes in strings as keys and makes them as small as possible.",
+  "description": "SweatMap takes in a series of UTF-8 strings and gives you a series of UTF-8 strings out that are as small as possible while still being unique.",
   "version": "0.0.0",
   "author": {
     "name": "Benjamin Solum",
@@ -18,6 +18,7 @@
     "optimize",
     "css"
   ],
+  "main": "dist/sweatmap-0.0.0.min.js",
   "readmeFilename": "README.md",
   "repository": {
     "type": "git",
@@ -27,7 +28,7 @@
     "build-dev": "NODE_ENV=development webpack",
     "build": "NODE_ENV=production webpack",
     "start": "npm run build && npm run build-dev",
-    "pretest": "eslint src/** src/**",
+    "pretest": "eslint src/**/*.js test/**/*.js",
     "test": "mocha"
   },
   "dependencies": {

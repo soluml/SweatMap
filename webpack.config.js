@@ -13,6 +13,9 @@ module.exports = {
     },
     debug: true,
     devtool: isProd ? 'false' : 'source-map',
+    resolve: {
+        root: [ path.resolve('src') ]
+    },
     module: {
         loaders: [
             {

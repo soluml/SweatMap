@@ -20,15 +20,12 @@
         ]
     },
     "globals": {
-        "Axios": false,
-        "Hammer": false,
-        "epublican": false
     },
     "env": {
         "es6": true,
         "browser": true,
         "commonjs": true,
-        "jasmine": true
+        "mocha": true
     },
     "extends": "eslint:recommended",
     "ecmaFeatures": {
