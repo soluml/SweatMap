@@ -172,29 +172,22 @@ const SweatMap = class SweatMap {
             throw new Error('SweatMap keys must be strings.');
 
         const getPatterns = () => {
-            function makeObject(reference) {
-                return {
-                    chars: reference,
-                    counter: 0
-                };
-            }
-
             //Hard Coded For Now
             if(bytes === 1) {
                 return [
-                    [makeObject(this.characters['1'])] //A
+                    [this.characters['1']] //A
                 ];
             } else if(bytes == 2) {
                 return [
-                    [makeObject(this.characters['1']), makeObject(this.characters['1'])], //AA
-                    [makeObject(this.characters['2'])] //B
+                    [this.characters['1'], this.characters['1']], //AA
+                    [this.characters['2']] //B
                 ];
             } else if(bytes == 3) {
                 return [
-                    [makeObject(this.characters['1']), makeObject(this.characters['1']), makeObject(this.characters['1'])], //AAA
-                    [makeObject(this.characters['2']), makeObject(this.characters['1'])], //BA
-                    [makeObject(this.characters['1']), makeObject(this.characters['2'])], //AB
-                    [makeObject(this.characters['3'])] //C
+                    [this.characters['1'], this.characters['1'], this.characters['1']], //AAA
+                    [this.characters['2'], this.characters['1']], //BA
+                    [this.characters['1'], this.characters['2']], //AB
+                    [this.characters['3']] //C
                 ];
             }
             //
@@ -221,21 +214,25 @@ const SweatMap = class SweatMap {
                 let currentPattern = patterns[patternsCounter];
 
                 //The sum of all the charlist's characters. If the totalCharlist equals the sum of all the char lists counters we have to move on to the next pattern
-                let totalCharlist = currentPattern.map(charlist => charlist.chars.length).reduce((prev, cur) => prev + cur);
+                let totalCharlist = currentPattern.map(charlist => charlist.length).reduce((prev, cur) => prev + cur);
+                
+                //Array of counters, one for each charlist
+                let currentPatternCounters = currentPattern.map(() => [0]);
 
                 //Loop through the all charlists trying all combinations before giving up.
-                while(this.has_obfuscated(value) && totalCharlist > currentPattern.map(charlist => charlist.counter).reduce((prev, cur) => prev + cur)) {
-                    
-                    
-                    
-                    
-                    
+                while(this.has_obfuscated(value) && totalCharlist > currentPatternCounters.reduce((prev, cur) => prev + cur)) {
                     //Add the next character from each charlist to the value
-                    currentPattern.forEach(charlist => {
-                        value += charlist.chars[charlist.counter];
+                    currentPattern.forEach((charlist, i) => {
+                        value += charlist[currentPatternCounters[i]];
                     });
                     
                     
+                    
+                    
+                    
+                    
+                    
+                    //currentPatternCounters
                     
                     
                     
