@@ -126,7 +126,7 @@ const SweatMap = class SweatMap {
         //Add existing strings to map
         if(typeof existing_strings == 'object') {
             Object.keys(existing_strings).forEach(key => {
-                if(typeof key == 'string') {
+                if(typeof key == 'string' && typeof existing_strings[key] == 'string') {
                     this.fmap.set(key, existing_strings[key]);
                     this.rmap.set(existing_strings[key], key);
                 }
