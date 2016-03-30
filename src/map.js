@@ -126,8 +126,10 @@ const SweatMap = class SweatMap {
         //Add existing strings to map
         if(typeof existing_strings == 'object') {
             Object.keys(existing_strings).forEach(key => {
-                this.fmap.set(key, existing_strings[key]);
-                this.rmap.set(existing_strings[key], key);
+                if(typeof key == 'string') {
+                    this.fmap.set(key, existing_strings[key]);
+                    this.rmap.set(existing_strings[key], key);
+                }
             });
         }
 
@@ -170,7 +172,7 @@ const SweatMap = class SweatMap {
             throw new Error('SweatMap keys must be strings.');
 
         var bytes    = 1,
-            pcounter = -1,
+            pcounter = 0,
             value    = '';
         
         const getPatterns = () => {
@@ -201,19 +203,6 @@ const SweatMap = class SweatMap {
             }
             //
         };
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
 
         //Set Value
         do {
@@ -221,35 +210,38 @@ const SweatMap = class SweatMap {
             let patterns = getPatterns();
 
             do {
+                //let pattern          = patterns[pcounter],        //Current pattern we're working through
+                    //charlistCounters = pattern.map(() => [0]);    //Current location in each charlist
+                    
+                    
+                
+                
+                /*
+                
+                
+                
+                pattern.forEach(charlist => {
+                    value += charlist.chars[charlist.counter];
+                });
+                
+                //Increment Counter
+                patternCounter[cl]++;
+
+                //Check if counter is longer than character array
+                if(patternCounter[cl] >= chars.length)
+                    getIncrementalableCounter(cl);
+                
+                */
+                
+                value += 'a';
+                
 
 
 
 
 
-
-                //Go to first/next pattern
+                //Go to next pattern
                 pcounter++;
-
-                let pattern         = patterns[pcounter],
-                    charlistLength  = pattern.map(charlist => charlist.chars.length).reduce((prev, cur) => prev + cur),
-                    charlistCounter = 0;
-
-                //Loop over each char list in the pattern until we hopefully find a match
-                do {
-                    pattern.forEach(charlist => {
-                        value += charlist.chars[charlist.counter];
-                        charlist.counter++;
-                        charlistCounter++;
-                    });
-                } while(this.has_obfuscated(value) && charlistLength > charlistCounter);
-
-
-
-
-
-
-
-
             } while(this.has_obfuscated(value) && pcounter < patterns.length);
 
             //If we run out of patterns to try, add a byte and try again
@@ -264,7 +256,6 @@ const SweatMap = class SweatMap {
         this.rmap.set(value, key);
 
         return value;
-        
     }
     
     delete(key) {
