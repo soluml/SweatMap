@@ -153,8 +153,6 @@ module.exports = class SweatMap {
         Object.keys(this.characters).forEach(C => {
             this.characters[C] = uniq(this.characters[C]);
         });
-        
-        console.log(this.characters['1'].length, this.characters['2'].length, this.characters['3'].length);
     }
 
     set(key) {
@@ -164,7 +162,7 @@ module.exports = class SweatMap {
         
         
         var bytes    = 1,
-            pcounter = 0,
+            pcounter = -1,
             value    = '';
         
         const getPatterns = () => {
@@ -199,53 +197,46 @@ module.exports = class SweatMap {
         if(typeof key == 'string') {
             //Set Value
             do {
-                
-                
-                
+                //Get all possible patterns
                 let patterns = getPatterns();
-            
-                
-                
-                
-                patterns[pcounter].forEach(pattern => {
-                    
-                    
-                    
-                    value += pattern.chars[pattern.counter];
-                    pattern.counter++;
+
+                do {
+
                     
                     
                     
                     
-                });
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-                
-            
+                    
+                    //Go to first/next pattern
+                    pcounter++;
+                    
+                    let pattern         = patterns[pcounter],
+                        charlistLength  = pattern.map(charlist => charlist.chars.length).reduce((prev, cur) => prev + cur),
+                        charlistCounter = 0;
+                    
+                    //Loop over each char list in the pattern until we hopefully find a match
+                    do {
+                        pattern.forEach(charlist => {
+                            value += charlist.chars[charlist.counter];
+                            charlist.counter++;
+                            charlistCounter++;
+                        });
+                    } while(this.has_obfuscated(value) && charlistLength > charlistCounter);
+                    
+                    
+
+                  
+                    
+                    
+                    
+                    
+                } while(this.has_obfuscated(value) && pcounter < patterns.length);
+
                 //If we run out of patterns to try, add a byte and try again
-                if(!patterns.length) {
+                if(pcounter === patterns.length - 1) {
                     bytes++;
                     pcounter = 0;
                 }
-                
-                
-                
-                
-                
-                
-                
-                
             } while(this.has_obfuscated(value));
 
             //Set maps
