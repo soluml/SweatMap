@@ -171,10 +171,6 @@ const SweatMap = class SweatMap {
         if(typeof key != 'string')
             throw new Error('SweatMap keys must be strings.');
 
-        var bytes    = 1,
-            pcounter = 0,
-            value    = '';
-        
         const getPatterns = () => {
             function makeObject(reference) {
                 return {
@@ -203,37 +199,37 @@ const SweatMap = class SweatMap {
             }
             //
         };
+        
+        var bytes = 0, //Determines what patterns to try
+            value;     //The obfuscated UTF-8 String
 
-        //Set Value
         do {
-            //Get all possible patterns
-            let patterns = getPatterns();
+            //Increment the bytes to look at new patterns
+            bytes++;
+            
+            //Reset Value
+            value = '';
 
-            do {
-                //let pattern          = patterns[pcounter],        //Current pattern we're working through
-                    //charlistCounters = pattern.map(() => [0]);    //Current location in each charlist
+            let patterns        = getPatterns(), //Get all possible patterns
+                patternsCounter = 0;             //Which pattern are we trying
+
+            while(this.has_obfuscated(value) && patternsCounter < patterns.length) {
+                let pattern = patterns[patternsCounter]; //Current pattern we're working through
                     
                     
                 
                 
-                /*
                 
                 
                 
+                
+                //Add the next character from each charlist to the value
                 pattern.forEach(charlist => {
                     value += charlist.chars[charlist.counter];
                 });
                 
-                //Increment Counter
-                patternCounter[cl]++;
-
-                //Check if counter is longer than character array
-                if(patternCounter[cl] >= chars.length)
-                    getIncrementalableCounter(cl);
                 
-                */
                 
-                value += 'a';
                 
 
 
@@ -241,13 +237,7 @@ const SweatMap = class SweatMap {
 
 
                 //Go to next pattern
-                pcounter++;
-            } while(this.has_obfuscated(value) && pcounter < patterns.length);
-
-            //If we run out of patterns to try, add a byte and try again
-            if(pcounter === patterns.length - 1) {
-                bytes++;
-                pcounter = 0;
+                patternsCounter++;
             }
         } while(this.has_obfuscated(value));
 
@@ -276,10 +266,16 @@ const SweatMap = class SweatMap {
     }
     
     has(key) {
+        if(!key)
+            return true;
+
         return this.fmap.has(key);
     }
     
     has_obfuscated(value) {
+        if(!value)
+            return true;
+
         return this.rmap.has(value);
     }
 
