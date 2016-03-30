@@ -214,27 +214,30 @@ const SweatMap = class SweatMap {
                 patternsCounter = 0;             //Which pattern are we trying
 
             while(this.has_obfuscated(value) && patternsCounter < patterns.length) {
-                let pattern = patterns[patternsCounter]; //Current pattern we're working through
+                //Current pattern we're working through
+                let currentPattern = patterns[patternsCounter];
+
+                //The sum of all the charlist's characters. If the totalCharlist equals the sum of all the char lists counters we have to move on to the next pattern
+                let totalCharlist = currentPattern.map(charlist => charlist.chars.length).reduce((prev, cur) => prev + cur);
+
+                //Loop through the all charlists trying all combinations before giving up.
+                while(this.has_obfuscated(value) && totalCharlist > currentPattern.map(charlist => charlist.counter).reduce((prev, cur) => prev + cur)) {
                     
                     
-                
-                
-                
-                
-                
-                
-                //Add the next character from each charlist to the value
-                pattern.forEach(charlist => {
-                    value += charlist.chars[charlist.counter];
-                });
-                
-                
-                
-                
-
-
-
-
+                    
+                    
+                    
+                    //Add the next character from each charlist to the value
+                    currentPattern.forEach(charlist => {
+                        value += charlist.chars[charlist.counter];
+                    });
+                    
+                    
+                    
+                    
+                    
+                    
+                }
 
                 //Go to next pattern
                 patternsCounter++;
