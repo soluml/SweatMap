@@ -199,9 +199,6 @@ const SweatMap = class SweatMap {
         do {
             //Increment the bytes to look at new patterns
             bytes++;
-            
-            //Reset Value
-            value = '';
 
             //Get all possible patterns
             let patterns = getPatterns(); 
@@ -221,6 +218,9 @@ const SweatMap = class SweatMap {
 
                 //Loop through the all charlists trying all combinations before giving up.
                 while(this.has_obfuscated(value) && totalCharlist > currentPatternCounters.reduce((prev, cur) => prev + cur)) {
+                    //Reset Value
+                    value = '';
+
                     //Add the next character from each charlist to the value
                     currentPattern.forEach((charlist, i) => {
                         value += charlist[currentPatternCounters[i]];
