@@ -210,8 +210,11 @@ const SweatMap = class SweatMap {
             //Reset Value
             value = '';
 
-            let patterns        = getPatterns(), //Get all possible patterns
-                patternsCounter = 0;             //Which pattern are we trying
+            //Get all possible patterns
+            let patterns = getPatterns(); 
+            
+            //Which pattern are we are currently trying
+            let patternsCounter = 0;
 
             while(this.has_obfuscated(value) && patternsCounter < patterns.length) {
                 //Current pattern we're working through
@@ -292,8 +295,10 @@ const SweatMap = class SweatMap {
 };
 
 
-//Export SweatMap for Browsers and CommonJS
+//Export SweatMap for Browsers ...
 if(typeof window === 'object')
     window.SweatMap = SweatMap;
+
+//... and CommonJS
 if(typeof module === 'object' && module.exports)
     module.exports = SweatMap;
