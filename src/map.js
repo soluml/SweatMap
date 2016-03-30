@@ -124,10 +124,12 @@ const SweatMap = class SweatMap {
         }, additional_ranges);
         
         //Add existing strings to map
-        Object.keys(existing_strings || {}).forEach(key => {
-            this.fmap.set(key, existing_strings[key]);
-            this.rmap.set(existing_strings[key], key);
-        });
+        if(typeof existing_strings == 'object') {
+            Object.keys(existing_strings).forEach(key => {
+                this.fmap.set(key, existing_strings[key]);
+                this.rmap.set(existing_strings[key], key);
+            });
+        }
 
         //Build chars array.
         Object.keys(Ranges).forEach(CR => {
@@ -149,10 +151,13 @@ const SweatMap = class SweatMap {
             }
         });
         
-        //Removes duplicate chars in the array
+        //Removes duplicate chars in the array then freeze to ensure nothing is changed
         Object.keys(this.characters).forEach(C => {
             this.characters[C] = uniq(this.characters[C]);
+            Object.freeze(this.characters[C]);
         });
+        
+        Object.freeze(this.characters);
     }
 
     set(key) {
@@ -160,7 +165,10 @@ const SweatMap = class SweatMap {
         if(this.fmap.has(key))
             return this.fmap.get(key);
         
-        
+        //If the key is not a string, throw an error
+        if(typeof key != 'string')
+            throw new Error('SweatMap keys must be strings.');
+
         var bytes    = 1,
             pcounter = -1,
             value    = '';
@@ -193,62 +201,90 @@ const SweatMap = class SweatMap {
             }
             //
         };
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
 
-        if(typeof key == 'string') {
-            //Set Value
+        //Set Value
+        do {
+            //Get all possible patterns
+            let patterns = getPatterns();
+
             do {
-                //Get all possible patterns
-                let patterns = getPatterns();
 
+
+
+
+
+
+                //Go to first/next pattern
+                pcounter++;
+
+                let pattern         = patterns[pcounter],
+                    charlistLength  = pattern.map(charlist => charlist.chars.length).reduce((prev, cur) => prev + cur),
+                    charlistCounter = 0;
+
+                //Loop over each char list in the pattern until we hopefully find a match
                 do {
+                    pattern.forEach(charlist => {
+                        value += charlist.chars[charlist.counter];
+                        charlist.counter++;
+                        charlistCounter++;
+                    });
+                } while(this.has_obfuscated(value) && charlistLength > charlistCounter);
 
-                    
-                    
-                    
-                    
-                    
-                    //Go to first/next pattern
-                    pcounter++;
-                    
-                    let pattern         = patterns[pcounter],
-                        charlistLength  = pattern.map(charlist => charlist.chars.length).reduce((prev, cur) => prev + cur),
-                        charlistCounter = 0;
-                    
-                    //Loop over each char list in the pattern until we hopefully find a match
-                    do {
-                        pattern.forEach(charlist => {
-                            value += charlist.chars[charlist.counter];
-                            charlist.counter++;
-                            charlistCounter++;
-                        });
-                    } while(this.has_obfuscated(value) && charlistLength > charlistCounter);
-                    
-                    
 
-                  
-                    
-                    
-                    
-                    
-                } while(this.has_obfuscated(value) && pcounter < patterns.length);
 
-                //If we run out of patterns to try, add a byte and try again
-                if(pcounter === patterns.length - 1) {
-                    bytes++;
-                    pcounter = 0;
-                }
-            } while(this.has_obfuscated(value));
 
-            //Set maps
-            this.fmap.set(key, value);
-            this.rmap.set(value, key);
 
-            return value;
-        } else
-            throw new Error('SweatMap keys must be strings.');
+
+
+
+            } while(this.has_obfuscated(value) && pcounter < patterns.length);
+
+            //If we run out of patterns to try, add a byte and try again
+            if(pcounter === patterns.length - 1) {
+                bytes++;
+                pcounter = 0;
+            }
+        } while(this.has_obfuscated(value));
+
+        //Set maps
+        this.fmap.set(key, value);
+        this.rmap.set(value, key);
+
+        return value;
+        
     }
     
-    has_original(key) {
+    delete(key) {
+        const value = this.fmap.get(key);
+        
+        if(value !== undefined) {
+            this.fmap.delete(key);
+            this.rmap.delete(value);
+        }
+    }
+    
+    get(key) {
+        return this.fmap.get(key);
+    }
+    
+    get_obfuscated(value) {
+        return this.rmap.get(value);
+    }
+    
+    has(key) {
         return this.fmap.has(key);
     }
     
@@ -260,13 +296,8 @@ const SweatMap = class SweatMap {
         return this.fmap.entries();
     }
     
-    delete(key) {
-        const value = this.fmap.get(key);
-        
-        if(value !== undefined) {
-            this.fmap.delete(key);
-            this.rmap.delete(value);
-        }
+    entries_obfuscated() {
+        return this.rmap.entries();
     }
 };
 
