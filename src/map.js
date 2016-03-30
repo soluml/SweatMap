@@ -217,7 +217,7 @@ const SweatMap = class SweatMap {
                 let totalCharlist = currentPattern.map(charlist => charlist.length).reduce((prev, cur) => prev + cur);
                 
                 //Array of counters, one for each charlist
-                let currentPatternCounters = currentPattern.map(() => [0]);
+                let currentPatternCounters = currentPattern.map(() => 0);
 
                 //Loop through the all charlists trying all combinations before giving up.
                 while(this.has_obfuscated(value) && totalCharlist > currentPatternCounters.reduce((prev, cur) => prev + cur)) {
@@ -226,17 +226,14 @@ const SweatMap = class SweatMap {
                         value += charlist[currentPatternCounters[i]];
                     });
                     
-                    
-                    
-                    
-                    
-                    
-                    
-                    //currentPatternCounters
-                    
-                    
-                    
-                    
+                    //Increment Counters
+                    for(let i = 0, ln = currentPatternCounters.length; i < ln; i++) {
+                        currentPatternCounters[i]++;
+                        
+                        //If the current counter is less than or equal to the total number of chars in this charlist, you don't need to increment anymore
+                        if(currentPatternCounters[i] <= currentPattern[i].length)
+                            break;
+                    }
                 }
 
                 //Go to next pattern

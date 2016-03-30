@@ -1,7 +1,6 @@
 var path = require('path');
 var webpack = require('webpack');
-var isBabel = (process.env.NODE_ENV == 'babel' ? true : false);
-var isProd = (process.env.NODE_ENV == 'production' || isBabel ? true : false);
+var isProd = (process.env.NODE_ENV == 'production' ? true : false);
 var packageJSON = require('./package.json');
 
 module.exports = {
@@ -10,7 +9,7 @@ module.exports = {
     },
     output: {
         path: 'dist',
-		filename: '[name]-'+ (isBabel ? 'babel-' : '') + packageJSON.version + (isProd ? '.min' : '') +'.js'
+		filename: '[name]'+ (isProd ? '-'+ packageJSON.version +'.min' : '') +'.js'
     },
     debug: true,
     devtool: isProd ? 'false' : 'source-map',
@@ -18,7 +17,7 @@ module.exports = {
         root: [ path.resolve('src') ]
     },
     module: {
-        loaders: [].concat(isBabel ? [
+        loaders: [].concat(isProd ? [
             {
                 test: /src\/.*\.js$/,
                 loader: 'babel-loader',
@@ -31,10 +30,9 @@ module.exports = {
     },
     plugins: [].concat(isProd ? [
         new webpack.optimize.UglifyJsPlugin({
+            screwIe8: true,
             minimize: true,
             comments: false,
-            sourceMap: false,
-            sourceMapIncludeSources: false,
             compress: { drop_console: true },
             mangle: {}
         })

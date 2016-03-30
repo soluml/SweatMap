@@ -25,10 +25,9 @@
     "url": "git://github.com/soluml/sweatmap.git"
   },
   "scripts": {
-    "build-babel": "NODE_ENV=babel webpack",
     "build-dev": "NODE_ENV=development webpack",
     "build-prod": "NODE_ENV=production webpack",
-    "start": "npm run build-babel && npm run build-prod && npm run build-dev",
+    "start": "npm run build-prod && npm run build-dev",
     "pretest": "eslint src/**/*.js test/**/*.js",
     "test": "mocha"
   },
