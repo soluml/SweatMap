@@ -93,6 +93,19 @@ describe('SweatMap', function() {
             assert.equal(str1, str2);
         });
         
+        it('Returns an error if the key is not a string:', function () {
+            assert.throws(() => { myMap.set({}); }, Error, '{} is not a string');
+            assert.throws(() => { myMap.set(0); }, Error, '0 is not a string');
+            assert.throws(() => { myMap.set([]); }, Error, '[] is not a string');
+            assert.throws(() => { myMap.set(function(){}); }, Error, 'function(){} is not a string');
+            assert.throws(() => { myMap.set(true); }, Error, 'true is not a string');
+            assert.throws(() => { myMap.set(null); }, Error, 'null is not a string');
+        });
+        
+        it('Returns an error if the key is an empty string:', function () {
+            assert.throws(() => { myMap.set(''); }, Error, '"" is an empty string');
+        });
+        
         it('Obfuscates the given keys correctly:', function () {
             //LONG Timeout -> 1min
             this.timeout(60000);
