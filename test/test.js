@@ -117,4 +117,26 @@ describe('SweatMap', function() {
         });
         
     });
+    
+    describe('delete(key)', function () {
+        
+        it('Deletes values from both fmap and rmap for a given key:', function () {
+            var myMap = new SweatMap();
+            
+            myMap.set('A-String');
+            myMap.set('B-String');
+            
+            assert.equal(myMap.fmap.has('A-String'), true);
+            assert.equal(myMap.fmap.has('B-String'), true);
+            
+            myMap.delete('B-String');
+            assert.equal(myMap.fmap.has('A-String'), true);
+            assert.equal(myMap.fmap.has('B-String'), false);
+            
+            myMap.delete('A-String');
+            assert.equal(myMap.fmap.has('A-String'), false);
+            assert.equal(myMap.fmap.has('B-String'), false);
+        });
+        
+    });
 });
