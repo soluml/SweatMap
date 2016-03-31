@@ -100,13 +100,19 @@ describe('SweatMap', function() {
             assert.equal(myMap.characters['2'].length, 1776);
             assert.equal(myMap.characters['3'].length, 57440);
 
-            for(i = 0; i < 53; i++) {
+            for(i = 0; i < 5000; i++) {
                 str = myMap.set('string'+ i);
                 
-                if(i < 52)
+                if(i < 52) {
                     assert.equal(myMap.bytes(str), 1);
-                else
+                } else if(i < 4480) { //52*52 + 1776 covers AA and B patterns
+                    
+                    
+                    console.log(i, str);
                     assert.equal(myMap.bytes(str), 2);
+                } else {
+                    assert.equal(myMap.bytes(str), 3);
+                }
             }
         });
         
