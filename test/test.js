@@ -181,6 +181,19 @@ describe('SweatMap', function() {
         
     });
     
+    describe('entries()', function () {
+        
+        it('Returns a new Iterator object that contains an array of [key, value] for each element in the Map object in insertion order:', function () {
+            var myMap = new SweatMap();
+            
+            myMap.set('A-String');
+            myMap.set('B-String');
+
+            assert.deepEqual(myMap.entries(), myMap.fmap.entries());
+        });
+        
+    });
+    
     describe('get(key)', function () {
         
         it('Get values from the map:', function () {
