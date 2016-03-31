@@ -141,7 +141,7 @@ const SweatMap = class SweatMap {
             for(let i = parseInt(Ranges[CR].start, 16); i <= parseInt(Ranges[CR].end, 16); i++) {
                 try {
                     let char  = String.fromCharCode(i),
-                        bytes = unescape(encodeURI(char)).length; //utf8 length -> https://gist.github.com/mathiasbynens/1010324
+                        bytes = this.bytes(char);
 
                     if(!this.characters[bytes])
                         this.characters[bytes] = [];
@@ -160,6 +160,11 @@ const SweatMap = class SweatMap {
         });
         
         Object.freeze(this.characters);
+    }
+    
+    bytes(str) {
+        //Determine how many bytes are in a given utf8 string -> https://gist.github.com/mathiasbynens/1010324
+        return unescape(encodeURI(str)).length;
     }
 
     set(key) {
@@ -277,14 +282,6 @@ const SweatMap = class SweatMap {
             return true;
 
         return this.rmap.has(value);
-    }
-
-    entries() {
-        return this.fmap.entries();
-    }
-    
-    entries_obfuscated() {
-        return this.rmap.entries();
     }
 };
 
