@@ -21,18 +21,11 @@ var myMap = new SweatMap({}, {
 });
 
 
-for(i = 0; i < 5000; i++) {
+for(i = 0; i < 200; i++) {
     str = myMap.set('string'+ i);
 
-    if(i < 52) {}
-    else if(i < 4480) { //52*52 + 1776 covers AA and B patterns
-        console.log(i, str);
-    } else {}
+    console.log(i, str);
 }
-
-
-//console.log( myMap.entries() );
-
         
         
         

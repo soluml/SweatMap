@@ -236,8 +236,16 @@ const SweatMap = class SweatMap {
                         currentPatternCounters[i]++;
                         
                         //If the current counter is less than or equal to the total number of chars in this charlist, you don't need to increment anymore
-                        if(currentPatternCounters[i] <= currentPattern[i].length)
+                        if(currentPatternCounters[i] <= currentPattern[i].length) {
+                            
+                            //If it's equal and there are more charlists
+                            if(currentPatternCounters[i] == currentPattern[i].length && i < ln-1) {
+                                currentPatternCounters[i] = 0;
+                                continue;
+                            }
+                            
                             break;
+                        }
                     }
                 }
 
