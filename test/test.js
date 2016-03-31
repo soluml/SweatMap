@@ -93,7 +93,10 @@ describe('SweatMap', function() {
             assert.equal(str1, str2);
         });
         
-        it('Obfuscates the given keys up to 52 strings:', function () {
+        it('Obfuscates the given keys correctly:', function () {
+            //LONG Timeout -> 1min
+            this.timeout(60000);
+            
             var i, str;
             
             assert.equal(myMap.characters['1'].length, 52);
@@ -103,20 +106,15 @@ describe('SweatMap', function() {
             for(i = 0; i < 5000; i++) {
                 str = myMap.set('string'+ i);
                 
-                if(i < 52) {
+                if(i < 52) { //(52)[A] == 52
                     assert.equal(myMap.bytes(str), 1);
-                } else if(i < 4480) { //52*52 + 1776 covers AA and B patterns
-                    
-                    
-                    console.log(i, str);
+                } else if(i < 4532) { //(^)[A] + (52*52)[AA] + (1776)[B] == 4532
                     assert.equal(myMap.bytes(str), 2);
-                } else {
+                } else { //(^)[A][AA][B] + (52*52*52)[AAA] + (1776*52)[BA] + (52*1776)[AB] + (57440)[C] ==   4532 + 140608 + 92532 + 92352 + 57440 == 387644
                     assert.equal(myMap.bytes(str), 3);
                 }
             }
         });
-        
-        
         
     });
 });
