@@ -123,19 +123,79 @@ describe('SweatMap', function() {
         it('Deletes values from both fmap and rmap for a given key:', function () {
             var myMap = new SweatMap();
             
-            myMap.set('A-String');
-            myMap.set('B-String');
+            var astr = myMap.set('A-String');
+            var bstr = myMap.set('B-String');
             
             assert.equal(myMap.fmap.has('A-String'), true);
             assert.equal(myMap.fmap.has('B-String'), true);
+            assert.equal(myMap.rmap.has(astr), true);
+            assert.equal(myMap.rmap.has(bstr), true);
             
             myMap.delete('B-String');
             assert.equal(myMap.fmap.has('A-String'), true);
             assert.equal(myMap.fmap.has('B-String'), false);
+            assert.equal(myMap.rmap.has(astr), true);
+            assert.equal(myMap.rmap.has(bstr), false);
             
             myMap.delete('A-String');
             assert.equal(myMap.fmap.has('A-String'), false);
             assert.equal(myMap.fmap.has('B-String'), false);
+            assert.equal(myMap.rmap.has(astr), false);
+            assert.equal(myMap.rmap.has(bstr), false);
+        });
+        
+    });
+    
+    describe('get(key)', function () {
+        
+        it('Get values from the map:', function () {
+            var myMap = new SweatMap();
+            
+            var astr = myMap.set('A-String');
+            
+            assert.equal(myMap.get('A-String'), astr);
+            assert.equal(myMap.get('A-String'), myMap.fmap.get('A-String'));
+        });
+        
+    });
+    
+    describe('get_obfuscated(value)', function () {
+        
+        it('Get keys from the map:', function () {
+            var myMap = new SweatMap();
+            
+            var astr = myMap.set('A-String');
+            
+            assert.equal(myMap.get_obfuscated(astr), 'A-String');
+            assert.equal(myMap.get_obfuscated(astr), myMap.rmap.get(astr));
+        });
+        
+    });
+    
+    describe('has(key)', function () {
+        
+        it('Can see if it has a key in the map:', function () {
+            var myMap = new SweatMap();
+            
+            myMap.set('A-String');
+            assert.equal(myMap.has('A-String'), true);
+            
+            myMap.delete('A-String');
+            assert.equal(myMap.has('A-String'), false);
+        });
+        
+    });
+    
+    describe('has_obfuscated(value)', function () {
+        
+        it('Can see if it has a value in the map:', function () {
+            var myMap = new SweatMap();
+            
+            var astr = myMap.set('A-String');
+            assert.equal(myMap.has_obfuscated(astr), true);
+            
+            myMap.delete('A-String');
+            assert.equal(myMap.has(astr), false);
         });
         
     });

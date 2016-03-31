@@ -173,7 +173,7 @@ const SweatMap = class SweatMap {
             return this.fmap.get(key);
         
         //If the key is not a string, throw an error
-        if(typeof key != 'string')
+        if(typeof key != 'string' || key === '')
             throw new Error('SweatMap keys must be strings.');
 
         const getPatterns = () => {
