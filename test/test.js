@@ -95,14 +95,18 @@ describe('SweatMap', function() {
         
         it('Obfuscates the given keys up to 52 strings:', function () {
             var i, str;
+            
+            assert.equal(myMap.characters['1'].length, 52);
+            assert.equal(myMap.characters['2'].length, 1776);
+            assert.equal(myMap.characters['3'].length, 57440);
 
             for(i = 0; i < 53; i++) {
                 str = myMap.set('string'+ i);
                 
                 if(i < 52)
-                    assert.equal(str.length, 1);
+                    assert.equal(myMap.bytes(str), 1);
                 else
-                    assert.equal(str.length, 2);
+                    assert.equal(myMap.bytes(str), 2);
             }
         });
         
