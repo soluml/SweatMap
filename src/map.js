@@ -270,6 +270,11 @@ const SweatMap = class SweatMap {
         }
     }
     
+    clear() {
+        this.fmap.clear();
+        this.rmap.clear();
+    }
+    
     get(key) {
         return this.fmap.get(key);
     }

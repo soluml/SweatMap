@@ -159,6 +159,28 @@ describe('SweatMap', function() {
         
     });
     
+    describe('clear()', function () {
+        
+        it('Clears values from both fmap and rmap:', function () {
+            var myMap = new SweatMap();
+            
+            var astr = myMap.set('A-String');
+            var bstr = myMap.set('B-String');
+            
+            assert.equal(myMap.fmap.has('A-String'), true);
+            assert.equal(myMap.fmap.has('B-String'), true);
+            assert.equal(myMap.rmap.has(astr), true);
+            assert.equal(myMap.rmap.has(bstr), true);
+            
+            myMap.clear();
+            assert.equal(myMap.fmap.has('A-String'), false);
+            assert.equal(myMap.fmap.has('B-String'), false);
+            assert.equal(myMap.rmap.has(astr), false);
+            assert.equal(myMap.rmap.has(bstr), false);
+        });
+        
+    });
+    
     describe('get(key)', function () {
         
         it('Get values from the map:', function () {
