@@ -1,4 +1,4 @@
 node_modules
 npm-debug.log
 *.map
-dist/sweatmap.js
+browser/sweatmap.js

@@ -5,21 +5,21 @@ var packageJSON = require('./package.json');
 
 module.exports = {
     entry: {
-        'sweatmap': ['./src/map.js'],
+        'sweatmap': ['./node/map.js'],
     },
     output: {
-        path: 'dist',
+        path: 'browser',
 		filename: '[name]'+ (isProd ? '-'+ packageJSON.version +'.min' : '') +'.js'
     },
     debug: true,
     devtool: isProd ? 'false' : 'source-map',
     resolve: {
-        root: [ path.resolve('src') ]
+        root: [ path.resolve('node') ]
     },
     module: {
         loaders: [].concat(isProd ? [
             {
-                test: /src\/.*\.js$/,
+                test: /node\/.*\.js$/,
                 loader: 'babel-loader',
                 query: {
                     presets: ['es2015']

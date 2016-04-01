@@ -1,7 +1,7 @@
 'use strict';
 
 var assert = require('assert');
-var SweatMap = require('../src/map.js');
+var SweatMap = require('../node/map.js');
 
 describe('SweatMap', function() {
     describe('#constructor(existing_strings, additional_ranges)', function () {
