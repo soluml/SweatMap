@@ -1,7 +1,7 @@
 {
   "name": "SweatMap",
   "description": "SweatMap takes in a series of UTF-8 strings and gives you a series of UTF-8 strings out that are as small as possible while still being unique.",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "author": {
     "name": "Benjamin Solum",
     "url": "http://soluml.com"
@@ -18,16 +18,14 @@
     "optimize",
     "css"
   ],
-  "main": "dist/sweatmap-0.0.0.min.js",
+  "main": "src/map.js",
   "readmeFilename": "README.md",
   "repository": {
     "type": "git",
     "url": "git://github.com/soluml/sweatmap.git"
   },
   "scripts": {
-    "build-dev": "NODE_ENV=development webpack",
-    "build-prod": "NODE_ENV=production webpack",
-    "start": "npm run build-prod && npm run build-dev",
+    "start": "NODE_ENV=production webpack",
     "pretest": "eslint src/**/*.js test/**/*.js",
     "test": "mocha"
   },
