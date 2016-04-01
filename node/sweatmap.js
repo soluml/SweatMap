@@ -1,4 +1,5 @@
 'use strict';
+
 const uniq = require('lodash.uniq');
 
 const SweatMap = class SweatMap {

@@ -18,7 +18,7 @@
     "optimize",
     "css"
   ],
-  "main": "node/map.js",
+  "main": "node/sweatmap.js",
   "readmeFilename": "README.md",
   "repository": {
     "type": "git",

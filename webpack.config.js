@@ -5,7 +5,7 @@ var packageJSON = require('./package.json');
 
 module.exports = {
     entry: {
-        'sweatmap': ['./node/map.js'],
+        'sweatmap': ['./node/sweatmap.js'],
     },
     output: {
         path: 'browser',
