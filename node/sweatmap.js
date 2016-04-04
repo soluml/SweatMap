@@ -3,7 +3,13 @@
 const uniq = require('lodash.uniq');
 
 const SweatMap = class SweatMap {
-    constructor(existing_strings, additional_ranges) {
+    constructor(obj) {
+        obj = typeof obj == 'object' ? obj : {};
+        
+        //Adhere to CSS class/id rules -> https://www.w3.org/TR/CSS2/syndata.html#characters
+        //Does not yet work with escaped characters or ISO 10646 characters as a numeric code
+        this.cssSafe = obj.cssSafe;
+
         //Map containing original string to obfuscated string values
         this.fmap = new Map();
         
@@ -16,6 +22,7 @@ const SweatMap = class SweatMap {
         //Default Ranges
         const Ranges = Object.assign({
             //http://jrgraphix.net/research/unicode_blocks.php
+            //https://www.cs.tut.fi/~jkorpela/ucs.html8
             //http://en.wikipedia.org/wiki/List_of_Unicode_characters
             "Basic Latin": { start: '0020', end: '007F' },
             "Latin-1 Supplement": { start: '00A0', end: '00FF' },
@@ -122,14 +129,14 @@ const SweatMap = class SweatMap {
             "Arabic Presentation Forms-B": { start: 'FE70', end: 'FEFF' },
             "Halfwidth and Fullwidth Forms": { start: 'FF00', end: 'FFEF' },
             "Specials": { start: 'FFF0', end: 'FFFF' }
-        }, additional_ranges);
+        }, obj.additional_ranges);
         
         //Add existing strings to map
-        if(typeof existing_strings == 'object') {
-            Object.keys(existing_strings).forEach(key => {
-                if(typeof key == 'string' && typeof existing_strings[key] == 'string') {
-                    this.fmap.set(key, existing_strings[key]);
-                    this.rmap.set(existing_strings[key], key);
+        if(typeof obj.existing_strings == 'object') {
+            Object.keys(obj.existing_strings).forEach(key => {
+                if(typeof key == 'string' && typeof obj.existing_strings[key] == 'string') {
+                    this.fmap.set(key, obj.existing_strings[key]);
+                    this.rmap.set(obj.existing_strings[key], key);
                 }
             });
         }
@@ -167,6 +174,15 @@ const SweatMap = class SweatMap {
         //Determine how many bytes are in a given utf8 string -> https://gist.github.com/mathiasbynens/1010324
         return unescape(encodeURI(str)).length;
     }
+    
+    cssSafeString(str) {
+        //https://www.w3.org/TR/CSS2/syndata.html#characters
+        //Does not yet work with escaped characters or ISO 10646 characters as a numeric code
+        if(/^[0-9]/.test(str) || /^\-\-/.test(str) || /^\-[0-9]/.test(str) || /^\-$/.test(str) || !/^[\-_a-zA-Z0-9\u00A0-\uFFFF]+$/.test(str))
+            return false;
+        
+        return true;
+    }
 
     set(key) {
         //If it's already been done, don't do it again!
@@ -199,6 +215,13 @@ const SweatMap = class SweatMap {
             //
         };
         
+        const isGoodValue = value => {
+            if(this.cssSafe)
+                return this.cssSafeString(value) && !this.has_obfuscated(value);
+            else
+                return !this.has_obfuscated(value);
+        };
+        
         var bytes = 0, //Determines what patterns to try
             value;     //The obfuscated UTF-8 String
 
@@ -212,7 +235,7 @@ const SweatMap = class SweatMap {
             //Which pattern are we are currently trying
             let patternsCounter = 0;
 
-            while(this.has_obfuscated(value) && patternsCounter < patterns.length) {
+            while(!isGoodValue(value) && patternsCounter < patterns.length) {
                 //Current pattern we're working through
                 let currentPattern = patterns[patternsCounter];
                 
@@ -223,7 +246,7 @@ const SweatMap = class SweatMap {
                 let lastMatch = currentPattern.map(charlist => charlist[charlist.length-1]).join('');
 
                 //Loop through the all charlists trying all combinations before giving up.
-                while(this.has_obfuscated(value) && lastMatch != value) {
+                while(!isGoodValue(value) && lastMatch != value) {
                     //Reset Value
                     value = '';
 
@@ -253,7 +276,7 @@ const SweatMap = class SweatMap {
                 //Go to next pattern
                 patternsCounter++;
             }
-        } while(this.has_obfuscated(value));
+        } while(!isGoodValue(value));
 
         //Set maps
         this.fmap.set(key, value);

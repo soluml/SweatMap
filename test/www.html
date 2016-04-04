@@ -9,29 +9,14 @@
         <script src="../browser/sweatmap.js"></script>
     </head>
     <body>
-<script>
+        <script>
+            var myMap = new SweatMap({"cssSafe": true});
 
-    
-    
-    
-var myMap = new SweatMap({}, {
-    "A-Z": { start: '41', end: '5A' },  //Add A-Z
-    "a-z": { start: '61', end: '7A' },  //Add a-z
-    "Basic Latin": { end: null }        //Removes Basic Latin
-});
+            for(i = 0; i < 2800; i++) {
+                str = myMap.set('string'+ i);
 
-
-for(i = 0; i < 2800; i++) {
-    str = myMap.set('string'+ i);
-
-    console.log(i, str);
-}
-        
-        
-        
-        
-        
-        
-</script>
+                console.log(i, str);
+            }
+        </script>
     </body>
 </html>

@@ -16,9 +16,11 @@ describe('SweatMap', function() {
         
         it('Can pass in existing UTF-8 String key/values:', function() {
             var myMap = new SweatMap({
-                "SafeString": "Whatever",
-                "☃": "�",
-                "Ignored": {}
+                "existing_strings": {
+                    "SafeString": "Whatever",
+                    "☃": "�",
+                    "Ignored": {}
+                }
             });
 
             assert.equal(myMap.fmap.get('SafeString'), 'Whatever');
@@ -30,11 +32,13 @@ describe('SweatMap', function() {
         });
         
         it('Can pass in adjusted character ranges:', function() {
-            var myMap = new SweatMap({}, {
-                "A-P": { start: '41', end: '50' }, //Add A-Z
-                "A-Z": { start: '41', end: '5A' }, //Any non-unique chars are filtered out!
-                "a-z": { start: '61', end: '7A' }, //Add a-z
-                "Basic Latin": { end: null }       //Removes Basic Latin
+            var myMap = new SweatMap({
+                "additional_ranges": {
+                    "A-P": { start: '41', end: '50' }, //Add A-Z
+                    "A-Z": { start: '41', end: '5A' }, //Any non-unique chars are filtered out!
+                    "a-z": { start: '61', end: '7A' }, //Add a-z
+                    "Basic Latin": { end: null }       //Removes Basic Latin
+                }
             });
 
             assert.equal(myMap.characters['1'].length, 52);
@@ -57,6 +61,12 @@ describe('SweatMap', function() {
             assert.deepEqual(myMap.fmap.entries().next(), {value: undefined, done: true});
             assert.deepEqual(myMap.rmap.entries().next(), {value: undefined, done: true});
         });
+        
+        it('Can set CSS Safe Mode:', function() {
+            var myMap = new SweatMap({ cssSafe: true });
+
+            assert.equal(myMap.cssSafe, true);
+        });
     });
     
     describe('bytes(str)', function () {
@@ -74,15 +84,35 @@ describe('SweatMap', function() {
         
     });
     
+    describe('cssSafeString(str)', function () {
+        
+        it('Determines if a string is a valid css identifier (e.g. class/id):', function () {
+            var myMap = new SweatMap();
+
+            assert.equal(myMap.cssSafeString('a'), true);
+            assert.equal(myMap.cssSafeString('*'), false);
+            assert.equal(myMap.cssSafeString('--'), false);
+            assert.equal(myMap.cssSafeString('-'), false);
+            assert.equal(myMap.cssSafeString('-8'), false);
+            assert.equal(myMap.cssSafeString('a-8'), true);
+            assert.equal(myMap.cssSafeString('�'), true);
+            assert.equal(myMap.cssSafeString('8a'), false);
+            assert.equal(myMap.cssSafeString('a8'), true);
+        });
+        
+    });
+    
     describe('set(key)', function () {
 
         var myMap;
         
         beforeEach(function() {
-            myMap = new SweatMap({}, {
-                "A-Z": { start: '41', end: '5A' },  //Add A-Z
-                "a-z": { start: '61', end: '7A' },  //Add a-z
-                "Basic Latin": { end: null }        //Removes Basic Latin
+            myMap = new SweatMap({
+                "additional_ranges": {
+                    "A-Z": { start: '41', end: '5A' },  //Add A-Z
+                    "a-z": { start: '61', end: '7A' },  //Add a-z
+                    "Basic Latin": { end: null }        //Removes Basic Latin
+                }
             });
         });
 
@@ -129,6 +159,31 @@ describe('SweatMap', function() {
             }
         });
         
+        
+        it('Obfuscates the given keys correctly (CSS Safe):', function () {
+            //LONG Timeout -> 1min
+            this.timeout(60000);
+            
+            var i, str, myOtherMap = new SweatMap({ cssSafe: true });
+            
+            assert.equal(myOtherMap.characters['1'].length, 96);
+            assert.equal(myOtherMap.characters['2'].length, 1776);
+            assert.equal(myOtherMap.characters['3'].length, 57440);
+            assert.equal(myOtherMap.cssSafe, true);
+            
+            for(i = 0; i < 5300; i++) {
+                str = myOtherMap.set('string'+ i);
+                
+                if(i < 53) { // a-z(26) + A-Z(26) + _(1)
+                    assert.equal(myMap.bytes(str), 1);
+                } else if(i < 5274) { //(53)[A]+ (54*64-11{--, -\d})[AA] + (1776)[B] == 5274
+                    assert.equal(myMap.bytes(str), 2);
+                } else {
+                    assert.equal(myMap.bytes(str), 3);
+                }
+            }
+        });
+
     });
     
     describe('delete(key)', function () {
