@@ -1,7 +1,7 @@
 {
-  "name": "SweatMap",
+  "name": "sweatmap",
   "description": "SweatMap takes in a series of UTF-8 strings and maps them to UTF-8 strings that are as small as possible while still being unique.",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "author": {
     "name": "Benjamin Solum",
     "url": "http://soluml.com"
