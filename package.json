@@ -4,6 +4,7 @@
   "version": "0.0.4",
   "author": {
     "name": "Benjamin Solum",
+    "email": "benjamin@soluml.com",
     "url": "http://soluml.com"
   },
   "preferGlobal": true,
