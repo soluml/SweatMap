@@ -185,6 +185,58 @@ const SweatMap = class SweatMap {
     }
 
     generatePatternForBytes(bytes) {
+        const makeArrayOfArraysUnique = function (array) {
+            const uniqueArray = [];
+            array.forEach(function (item) {
+                let found = false;
+                let stringified = JSON.stringify(item);
+
+                uniqueArray.forEach(function (uniqueItem) {
+                    if (JSON.stringify(uniqueItem) == stringified) {
+                        found = true;
+                    }
+                });
+
+                if (!found) {
+                    uniqueArray.push(item);
+                }
+            });
+            return uniqueArray;
+        }
+
+        // TODO Find all the different possible number arrays that need permutation
+        const sums = function (n) {
+            let possibleSums = [];
+            var subsetSum = function (subset, target, partial = []) {
+                let s = partial.reduce((a, b) => a + b, 0);
+
+                if (s === target) {
+                    possibleSums.push(partial);
+                } else if (s >= target) {
+                    return;
+                }
+
+                for (let i = 0; i < subset.length; i++) {
+                    let n = subset[i];
+                    let remaining = subset[i + 1];
+                    subsetSum(subset.filter((value, index) => index > 0), target, partial.concat(n));
+                }
+            };
+            var subset = [];
+            for (let i = 1; i <= n; i++) {
+                subset = subset.concat(new Array(n).fill(i));
+            }
+            subsetSum(subset, n);
+
+            // console.log(possibleSums);
+            // console.log(makeArrayOfArraysUnique(possibleSums));
+
+            // console.log(subset);
+            // return [[1, 1, 1, 1], [2, 2], [1, 1, 2], [3, 1], [4]];
+            return makeArrayOfArraysUnique(possibleSums);
+        };
+
+        // Find the permutations for the different possible number arrays
         const permutations = [];
         const swap = function (array, i, j) {
             const temp = array[i];
@@ -205,11 +257,14 @@ const SweatMap = class SweatMap {
             }
         };
 
-        // TODO Remove temp
-        const array = [2, 2, 1];
-        permute(array, 0, array.length);
 
-        // TODO Find all the different possible number arrays that need permutation
+        // Find all the permutations
+        sums(bytes).forEach(function (sum) {
+            permute(sum, 0, sum.length);
+        });
+
+        // console.log(sums(bytes));
+
 
         // Remove any duplicates
         const uniquePermutations = [];
@@ -228,9 +283,11 @@ const SweatMap = class SweatMap {
             }
         });
 
-        // TODO Use the unique permutations to generate the patterns we want
 
-        console.log(uniquePermutations);
+        // TODO Use the unique permutations to generate the patterns we want
+        // console.log(makeArrayOfArraysUnique(permutations));
+
+        return makeArrayOfArraysUnique(permutations);
     }
 
 /*
