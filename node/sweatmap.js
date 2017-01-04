@@ -185,7 +185,8 @@ const SweatMap = class SweatMap {
     }
 
     generatePatternForBytes(bytes) {
-        const makeArrayOfArraysUnique = function (array) {
+        // We will need to remove duplicate sums later
+        const removeDuplicatesFromArrayOfArrays = function (array) {
             const uniqueArray = [];
             array.forEach(function (item) {
                 let found = false;
@@ -202,12 +203,13 @@ const SweatMap = class SweatMap {
                 }
             });
             return uniqueArray;
-        }
+        };
 
-        // TODO Find all the different possible number arrays that need permutation
-        const sums = function (n) {
+        // Find all the different possible combinations of sums
+        const calculateSumCombinations = function (n) {
             let possibleSums = [];
-            var subsetSum = function (subset, target, partial = []) {
+            // Our subset sum function for finding possible sums combinations for our target value
+            const subsetSum = function (subset, target, partial = []) {
                 let s = partial.reduce((a, b) => a + b, 0);
 
                 if (s === target) {
@@ -216,102 +218,38 @@ const SweatMap = class SweatMap {
                     return;
                 }
 
-                for (let i = 0; i < subset.length; i++) {
-                    let n = subset[i];
-                    let remaining = subset[i + 1];
-                    subsetSum(subset.filter((value, index) => index > 0), target, partial.concat(n));
-                }
+                subset.forEach(function (number) {
+                    let remaining = subset.filter((value, index) => index > 0);
+                    subsetSum(remaining, target, partial.concat(number));
+                });
             };
-            var subset = [];
+
+            // Create our subset
+            let subset = [];
             for (let i = 1; i <= n; i++) {
+                // Adding max duplicates of each number to simplify the logic
+                // It also has the benefit of not needing to calculate permutations separately once we remove duplicates
                 subset = subset.concat(new Array(n).fill(i));
             }
             subsetSum(subset, n);
 
-            // console.log(possibleSums);
-            // console.log(makeArrayOfArraysUnique(possibleSums));
-
-            // console.log(subset);
-            // return [[1, 1, 1, 1], [2, 2], [1, 1, 2], [3, 1], [4]];
-            return makeArrayOfArraysUnique(possibleSums);
+            return possibleSums;
         };
 
-        // Find the permutations for the different possible number arrays
-        const permutations = [];
-        const swap = function (array, i, j) {
-            const temp = array[i];
-            array[i] = array[j];
-            array[j] = temp;
-            return array;
-        };
-        const permute = function (numbers, low, high) {
-            if (low == high) {
-                permutations.push(numbers.concat([]));
-                return;
-            }
-
-            for (let i = low; i < high; i++) {
-                swap(numbers, i, low);
-                permute(numbers, low + 1, high);
-                swap(numbers, low, i);
-            }
-        };
+        // Remove all duplicate sums
+        let numericPatternArray = removeDuplicatesFromArrayOfArrays(calculateSumCombinations(bytes));
 
 
-        // Find all the permutations
-        sums(bytes).forEach(function (sum) {
-            permute(sum, 0, sum.length);
-        });
+        // TODO Apply this.characters to patterns
 
-        // console.log(sums(bytes));
-
-
-        // Remove any duplicates
-        const uniquePermutations = [];
-        permutations.forEach(function (permutation) {
-            let found = false;
-            let stringified = JSON.stringify(permutation);
-
-            uniquePermutations.forEach(function (uniquePermutation) {
-                if (JSON.stringify(uniquePermutation) == stringified) {
-                    found = true;
-                }
+        return numericPatternArray.map((pattern) => {
+            return pattern.map((value) => {
+               return this.characters['' + value];
             });
-
-            if (!found) {
-                uniquePermutations.push(permutation);
-            }
         });
 
-
-        // TODO Use the unique permutations to generate the patterns we want
-        // console.log(makeArrayOfArraysUnique(permutations));
-
-        return makeArrayOfArraysUnique(permutations);
+        // return numericPatternArray;
     }
-
-/*
-    generatePatternForBytes(bytes) {
-        //Hard Coded For Now
-        if(bytes === 1) {
-            return [
-                [this.characters['1']] //A
-            ];
-        } else if(bytes == 2) {
-            return [
-                [this.characters['1'], this.characters['1']], //AA
-                [this.characters['2']] //B
-            ];
-        } else if(bytes == 3) {
-            return [
-                [this.characters['1'], this.characters['1'], this.characters['1']], //AAA
-                [this.characters['2'], this.characters['1']], //BA
-                [this.characters['1'], this.characters['2']], //AB
-                [this.characters['3']] //C
-            ];
-        }
-    }
-*/
 
     set(key) {
         //If it's already been done, don't do it again!

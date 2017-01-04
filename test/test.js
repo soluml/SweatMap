@@ -102,7 +102,7 @@ describe('SweatMap', function() {
         
     });
 
-    describe.only('generatePatternForBytes(bytes)', function () {
+    describe('generatePatternForBytes(bytes)', function () {
         var myMap;
         var patternCountTest = function (bytes) {
             var expectedPatterns = Math.pow(2, bytes - 1);
@@ -111,7 +111,6 @@ describe('SweatMap', function() {
 
             for (var i = 0; i < expectedPatterns; i++) {
                 try {
-                    console.log('debug', i, patterns[i].length);
                     if (patterns[i].length > 0) {
                         patternCount++;
                     }
@@ -120,8 +119,6 @@ describe('SweatMap', function() {
                 }
             }
 
-            console.log('test', patternCount, expectedPatterns);
-
             assert.equal(patternCount, expectedPatterns);
         };
         
@@ -129,6 +126,7 @@ describe('SweatMap', function() {
             myMap = new SweatMap({
                 "additional_ranges": {
                     "A-Z": { start: '41', end: '5A' },  //Add A-Z
+                    "a-z": { start: '61', end: '7A' },  //Add a-z
                     "Basic Latin": { end: null }        //Removes Basic Latin
                 }
             });
