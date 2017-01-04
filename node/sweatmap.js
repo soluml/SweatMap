@@ -184,6 +184,27 @@ const SweatMap = class SweatMap {
         return true;
     }
 
+    generatePatternForBytes(bytes) {
+        //Hard Coded For Now
+        if(bytes === 1) {
+            return [
+                [this.characters['1']] //A
+            ];
+        } else if(bytes == 2) {
+            return [
+                [this.characters['1'], this.characters['1']], //AA
+                [this.characters['2']] //B
+            ];
+        } else if(bytes == 3) {
+            return [
+                [this.characters['1'], this.characters['1'], this.characters['1']], //AAA
+                [this.characters['2'], this.characters['1']], //BA
+                [this.characters['1'], this.characters['2']], //AB
+                [this.characters['3']] //C
+            ];
+        }
+    }
+
     set(key) {
         //If it's already been done, don't do it again!
         if(this.fmap.has(key))
@@ -194,25 +215,7 @@ const SweatMap = class SweatMap {
             throw new Error('SweatMap keys must be strings.');
 
         const getPatterns = () => {
-            //Hard Coded For Now
-            if(bytes === 1) {
-                return [
-                    [this.characters['1']] //A
-                ];
-            } else if(bytes == 2) {
-                return [
-                    [this.characters['1'], this.characters['1']], //AA
-                    [this.characters['2']] //B
-                ];
-            } else if(bytes == 3) {
-                return [
-                    [this.characters['1'], this.characters['1'], this.characters['1']], //AAA
-                    [this.characters['2'], this.characters['1']], //BA
-                    [this.characters['1'], this.characters['2']], //AB
-                    [this.characters['3']] //C
-                ];
-            }
-            //
+            return this.generatePatternForBytes(bytes);
         };
         
         const isGoodValue = value => {

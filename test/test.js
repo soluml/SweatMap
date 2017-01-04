@@ -101,6 +101,55 @@ describe('SweatMap', function() {
         });
         
     });
+
+    describe.only('generatePatternForBytes(bytes)', function () {
+        var myMap;
+        var patternCountTest = function (bytes) {
+            var expectedPatterns = Math.pow(2, bytes - 1);
+            var patterns = myMap.generatePatternForBytes(bytes);
+            var patternCount = 0;
+
+            for (var i = 0; i < expectedPatterns; i++) {
+                try {
+                    console.log('debug', i, patterns[i].length);
+                    if (patterns[i].length > 0) {
+                        patternCount++;
+                    }
+                } catch (err) {
+                    break;
+                }
+            }
+
+            console.log('test', patternCount, expectedPatterns);
+
+            assert.equal(patternCount, expectedPatterns);
+        };
+        
+        beforeEach(function() {
+            myMap = new SweatMap({
+                "additional_ranges": {
+                    "A-Z": { start: '41', end: '5A' },  //Add A-Z
+                    "Basic Latin": { end: null }        //Removes Basic Latin
+                }
+            });
+        });
+
+        it('Should generate proper number of patterns for 1 bytes', function () {
+            patternCountTest(1);
+        });
+
+        it('Should generate proper number of patterns for 2 bytes', function () {
+            patternCountTest(2);
+        });
+
+        it('Should generate proper number of patterns for 3 bytes', function () {
+            patternCountTest(3);
+        });
+
+        it('Should generate proper number of patterns for 4 bytes', function () {
+            patternCountTest(4);
+        });
+    });
     
     describe('set(key)', function () {
 
