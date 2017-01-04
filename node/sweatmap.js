@@ -185,6 +185,56 @@ const SweatMap = class SweatMap {
     }
 
     generatePatternForBytes(bytes) {
+        const permutations = [];
+        const swap = function (array, i, j) {
+            const temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+            return array;
+        };
+        const permute = function (numbers, low, high) {
+            if (low == high) {
+                permutations.push(numbers.concat([]));
+                return;
+            }
+
+            for (let i = low; i < high; i++) {
+                swap(numbers, i, low);
+                permute(numbers, low + 1, high);
+                swap(numbers, low, i);
+            }
+        };
+
+        // TODO Remove temp
+        const array = [2, 2, 1];
+        permute(array, 0, array.length);
+
+        // TODO Find all the different possible number arrays that need permutation
+
+        // Remove any duplicates
+        const uniquePermutations = [];
+        permutations.forEach(function (permutation) {
+            let found = false;
+            let stringified = JSON.stringify(permutation);
+
+            uniquePermutations.forEach(function (uniquePermutation) {
+                if (JSON.stringify(uniquePermutation) == stringified) {
+                    found = true;
+                }
+            });
+
+            if (!found) {
+                uniquePermutations.push(permutation);
+            }
+        });
+
+        // TODO Use the unique permutations to generate the patterns we want
+
+        console.log(uniquePermutations);
+    }
+
+/*
+    generatePatternForBytes(bytes) {
         //Hard Coded For Now
         if(bytes === 1) {
             return [
@@ -204,6 +254,7 @@ const SweatMap = class SweatMap {
             ];
         }
     }
+*/
 
     set(key) {
         //If it's already been done, don't do it again!

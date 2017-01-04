@@ -149,6 +149,10 @@ describe('SweatMap', function() {
         it('Should generate proper number of patterns for 4 bytes', function () {
             patternCountTest(4);
         });
+
+        it('Should generate proper number of patterns for 5 bytes', function () {
+            patternCountTest(5);
+        });
     });
     
     describe('set(key)', function () {
