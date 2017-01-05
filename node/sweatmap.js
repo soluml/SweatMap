@@ -184,6 +184,10 @@ const SweatMap = class SweatMap {
         return true;
     }
 
+    size() {
+        return this.fmap.size && this.rmap.size;
+    }
+
     generatePatternForBytes(bytes) {
         // We will need to remove duplicate sums later
         const removeDuplicatesFromArrayOfArrays = function (array) {
