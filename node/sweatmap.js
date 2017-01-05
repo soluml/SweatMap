@@ -1,21 +1,22 @@
 'use strict';
 
-const uniq = require('lodash.uniq');
+const uniq = require('lodash/uniqWith');
+const isEqual = require('lodash/isEqual');
 
 const SweatMap = class SweatMap {
     constructor(obj) {
         obj = typeof obj == 'object' ? obj : {};
-        
+
         //Adhere to CSS class/id rules -> https://www.w3.org/TR/CSS2/syndata.html#characters
         //Does not yet work with escaped characters or ISO 10646 characters as a numeric code
         this.cssSafe = obj.cssSafe;
 
         //Map containing original string to obfuscated string values
         this.fmap = new Map();
-        
+
         //Map containing obfuscated string to original string values
         this.rmap = new Map();
-        
+
         //Available characters keyed by number of bytes
         this.characters = {};
 
@@ -130,7 +131,7 @@ const SweatMap = class SweatMap {
             "Halfwidth and Fullwidth Forms": { start: 'FF00', end: 'FFEF' },
             "Specials": { start: 'FFF0', end: 'FFFF' }
         }, obj.additional_ranges);
-        
+
         //Add existing strings to map
         if(typeof obj.existing_strings == 'object') {
             Object.keys(obj.existing_strings).forEach(key => {
@@ -145,7 +146,7 @@ const SweatMap = class SweatMap {
         Object.keys(Ranges).forEach(CR => {
             if(Ranges[CR].start == undefined || Ranges[CR].end == undefined)
                 return;
-            
+
             for(let i = parseInt(Ranges[CR].start, 16); i <= parseInt(Ranges[CR].end, 16); i++) {
                 try {
                     let char  = String.fromCharCode(i),
@@ -160,27 +161,27 @@ const SweatMap = class SweatMap {
                 }
             }
         });
-        
+
         //Removes duplicate chars in the array then freeze to ensure nothing is changed
         Object.keys(this.characters).forEach(C => {
             this.characters[C] = uniq(this.characters[C]);
             Object.freeze(this.characters[C]);
         });
-        
+
         Object.freeze(this.characters);
     }
-    
+
     bytes(str) {
         //Determine how many bytes are in a given utf8 string -> https://gist.github.com/mathiasbynens/1010324
         return unescape(encodeURI(str)).length;
     }
-    
+
     cssSafeString(str) {
         //https://www.w3.org/TR/CSS2/syndata.html#characters
         //Does not yet work with escaped characters or ISO 10646 characters as a numeric code
         if(/^[0-9]/.test(str) || /^\-\-/.test(str) || /^\-[0-9]/.test(str) || /^\-$/.test(str) || !/^[\-_a-zA-Z0-9\u00A0-\uFFFF]+$/.test(str))
             return false;
-        
+
         return true;
     }
 
@@ -189,87 +190,55 @@ const SweatMap = class SweatMap {
     }
 
     generatePatternForBytes(bytes) {
-        // We will need to remove duplicate sums later
-        const removeDuplicatesFromArrayOfArrays = function (array) {
-            const uniqueArray = [];
-            array.forEach(function (item) {
-                let found = false;
-                let stringified = JSON.stringify(item);
-
-                uniqueArray.forEach(function (uniqueItem) {
-                    if (JSON.stringify(uniqueItem) == stringified) {
-                        found = true;
-                    }
-                });
-
-                if (!found) {
-                    uniqueArray.push(item);
-                }
-            });
-            return uniqueArray;
-        };
-
         // Find all the different possible combinations of sums
-        const calculateSumCombinations = function (n) {
-            let possibleSums = [];
+        const calculateSumCombinations = (n) => {
+            const possibleSums = [];
+            let subset = [];
+
             // Our subset sum function for finding possible sums combinations for our target value
-            const subsetSum = function (subset, target, partial = []) {
+            const subsetSum = (subset, target, partial = []) => {
                 let s = partial.reduce((a, b) => a + b, 0);
 
-                if (s === target) {
-                    possibleSums.push(partial);
-                } else if (s >= target) {
-                    return;
-                }
+                if (s === target) possibleSums.push(partial);
+                else if (s >= target) return;
 
-                subset.forEach(function (number) {
-                    let remaining = subset.filter((value, index) => index > 0);
-                    subsetSum(remaining, target, partial.concat(number));
-                });
+                subset.forEach(num => subsetSum(subset.slice(1), target, partial.concat(num)));
             };
 
             // Create our subset
-            let subset = [];
             for (let i = 1; i <= n; i++) {
                 // Adding max duplicates of each number to simplify the logic
                 // It also has the benefit of not needing to calculate permutations separately once we remove duplicates
                 subset = subset.concat(new Array(n).fill(i));
             }
+
             subsetSum(subset, n);
 
             return possibleSums;
         };
 
-        // Remove all duplicate sums
-        let numericPatternArray = removeDuplicatesFromArrayOfArrays(calculateSumCombinations(bytes));
-
-        return numericPatternArray.map((pattern) => {
-            return pattern.map((value) => {
-               return this.characters['' + value];
-            });
-        });
+        return uniq(calculateSumCombinations(bytes), isEqual)
+            .map(pattern => pattern
+                .map(val => this.characters[`${val}`])
+        );
     }
 
     set(key) {
         //If it's already been done, don't do it again!
         if(this.fmap.has(key))
             return this.fmap.get(key);
-        
+
         //If the key is not a string, throw an error
         if(typeof key != 'string' || key === '')
             throw new Error('SweatMap keys must be strings.');
 
-        const getPatterns = () => {
-            return this.generatePatternForBytes(bytes);
-        };
-        
         const isGoodValue = value => {
             if(this.cssSafe)
                 return this.cssSafeString(value) && !this.has_obfuscated(value);
             else
                 return !this.has_obfuscated(value);
         };
-        
+
         var bytes = 0, //Determines what patterns to try
             value;     //The obfuscated UTF-8 String
 
@@ -278,18 +247,18 @@ const SweatMap = class SweatMap {
             bytes++;
 
             //Get all possible patterns
-            let patterns = getPatterns(); 
-            
+            let patterns = this.generatePatternForBytes(bytes);
+
             //Which pattern are we are currently trying
             let patternsCounter = 0;
 
             while(!isGoodValue(value) && patternsCounter < patterns.length) {
                 //Current pattern we're working through
                 let currentPattern = patterns[patternsCounter];
-                
+
                 //Array of counters, one for each charlist
                 let currentPatternCounters = currentPattern.map(() => 0);
-                
+
                 //Last possible match
                 let lastMatch = currentPattern.map(charlist => charlist[charlist.length-1]).join('');
 
@@ -302,20 +271,20 @@ const SweatMap = class SweatMap {
                     currentPattern.forEach((charlist, i) => {
                         value += charlist[currentPatternCounters[i]];
                     });
-                    
+
                     //Increment Counters
                     for(let i = 0, ln = currentPatternCounters.length; i < ln; i++) {
                         currentPatternCounters[i]++;
-                        
+
                         //If the current counter is less than or equal to the total number of chars in this charlist, you don't need to increment anymore
                         if(currentPatternCounters[i] <= currentPattern[i].length) {
-                            
+
                             //If it's equal and there are more charlists
                             if(currentPatternCounters[i] == currentPattern[i].length && i < ln-1) {
                                 currentPatternCounters[i] = 0;
                                 continue;
                             }
-                            
+
                             break;
                         }
                     }
@@ -332,40 +301,40 @@ const SweatMap = class SweatMap {
 
         return value;
     }
-    
+
     delete(key) {
         const value = this.fmap.get(key);
-        
+
         if(value !== undefined) {
             this.fmap.delete(key);
             this.rmap.delete(value);
         }
     }
-    
+
     clear() {
         this.fmap.clear();
         this.rmap.clear();
     }
-    
+
     entries() {
         return this.fmap.entries();
     }
-    
+
     get(key) {
         return this.fmap.get(key);
     }
-    
+
     get_obfuscated(value) {
         return this.rmap.get(value);
     }
-    
+
     has(key) {
         if(!key)
             return true;
 
         return this.fmap.has(key);
     }
-    
+
     has_obfuscated(value) {
         if(!value)
             return true;
