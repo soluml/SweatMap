@@ -184,6 +184,72 @@ const SweatMap = class SweatMap {
         return true;
     }
 
+    size() {
+        return this.fmap.size && this.rmap.size;
+    }
+
+    generatePatternForBytes(bytes) {
+        // We will need to remove duplicate sums later
+        const removeDuplicatesFromArrayOfArrays = function (array) {
+            const uniqueArray = [];
+            array.forEach(function (item) {
+                let found = false;
+                let stringified = JSON.stringify(item);
+
+                uniqueArray.forEach(function (uniqueItem) {
+                    if (JSON.stringify(uniqueItem) == stringified) {
+                        found = true;
+                    }
+                });
+
+                if (!found) {
+                    uniqueArray.push(item);
+                }
+            });
+            return uniqueArray;
+        };
+
+        // Find all the different possible combinations of sums
+        const calculateSumCombinations = function (n) {
+            let possibleSums = [];
+            // Our subset sum function for finding possible sums combinations for our target value
+            const subsetSum = function (subset, target, partial = []) {
+                let s = partial.reduce((a, b) => a + b, 0);
+
+                if (s === target) {
+                    possibleSums.push(partial);
+                } else if (s >= target) {
+                    return;
+                }
+
+                subset.forEach(function (number) {
+                    let remaining = subset.filter((value, index) => index > 0);
+                    subsetSum(remaining, target, partial.concat(number));
+                });
+            };
+
+            // Create our subset
+            let subset = [];
+            for (let i = 1; i <= n; i++) {
+                // Adding max duplicates of each number to simplify the logic
+                // It also has the benefit of not needing to calculate permutations separately once we remove duplicates
+                subset = subset.concat(new Array(n).fill(i));
+            }
+            subsetSum(subset, n);
+
+            return possibleSums;
+        };
+
+        // Remove all duplicate sums
+        let numericPatternArray = removeDuplicatesFromArrayOfArrays(calculateSumCombinations(bytes));
+
+        return numericPatternArray.map((pattern) => {
+            return pattern.map((value) => {
+               return this.characters['' + value];
+            });
+        });
+    }
+
     set(key) {
         //If it's already been done, don't do it again!
         if(this.fmap.has(key))
@@ -194,25 +260,7 @@ const SweatMap = class SweatMap {
             throw new Error('SweatMap keys must be strings.');
 
         const getPatterns = () => {
-            //Hard Coded For Now
-            if(bytes === 1) {
-                return [
-                    [this.characters['1']] //A
-                ];
-            } else if(bytes == 2) {
-                return [
-                    [this.characters['1'], this.characters['1']], //AA
-                    [this.characters['2']] //B
-                ];
-            } else if(bytes == 3) {
-                return [
-                    [this.characters['1'], this.characters['1'], this.characters['1']], //AAA
-                    [this.characters['2'], this.characters['1']], //BA
-                    [this.characters['1'], this.characters['2']], //AB
-                    [this.characters['3']] //C
-                ];
-            }
-            //
+            return this.generatePatternForBytes(bytes);
         };
         
         const isGoodValue = value => {
