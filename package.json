@@ -21,6 +21,9 @@
   ],
   "main": "node/sweatmap.js",
   "readmeFilename": "README.md",
+  "engines": {
+    "node": ">=6.0.0"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/soluml/sweatmap.git"
