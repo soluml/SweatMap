@@ -1,4 +1,7 @@
 #SweatMap
+[![npm version](https://badge.fury.io/js/sweatmap.svg)](http://badge.fury.io/js/sweatmap)
+[![Build Status](https://travis-ci.org/soluml/SweatMap.svg?branch=master)](https://travis-ci.org/soluml/SweatMap)
+
 Take in a series of UTF-8 strings and map them to UTF-8 strings that are as small as possible while still being unique.
 
 ###Why?
