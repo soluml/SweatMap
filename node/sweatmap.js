@@ -243,16 +243,11 @@ const SweatMap = class SweatMap {
         // Remove all duplicate sums
         let numericPatternArray = removeDuplicatesFromArrayOfArrays(calculateSumCombinations(bytes));
 
-
-        // TODO Apply this.characters to patterns
-
         return numericPatternArray.map((pattern) => {
             return pattern.map((value) => {
                return this.characters['' + value];
             });
         });
-
-        // return numericPatternArray;
     }
 
     set(key) {
