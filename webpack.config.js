@@ -1,7 +1,7 @@
 var path = require("path");
 var webpack = require("webpack");
 var packageJSON = require("./package.json");
-var UglifyJSPlugin = require("uglifyjs-webpack-plugin");
+var TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = {
   mode: "production",
@@ -24,8 +24,8 @@ module.exports = {
   optimization: {
     minimize: true,
     minimizer: [
-      new UglifyJSPlugin({
-        uglifyOptions: {
+      new TerserPlugin({
+        terserOptions: {
           compress: {
             drop_console: true,
             drop_debugger: true
