@@ -3,9 +3,9 @@
 var assert = require("assert");
 var SweatMap = require("../node/sweatmap.js");
 
-describe("SweatMap", function() {
-  describe("#constructor(existing_strings, additional_ranges)", function() {
-    it("Default character limits:", function() {
+describe("SweatMap", function () {
+  describe("#constructor(existing_strings, additional_ranges)", function () {
+    it("Default character limits:", function () {
       var myMap = new SweatMap();
 
       assert.equal(myMap.characters["1"].length, 96);
@@ -13,13 +13,13 @@ describe("SweatMap", function() {
       assert.equal(myMap.characters["3"].length, 57440);
     });
 
-    it("Can pass in existing UTF-8 String key/values:", function() {
+    it("Can pass in existing UTF-8 String key/values:", function () {
       var myMap = new SweatMap({
         existing_strings: {
           SafeString: "Whatever",
           "☃": "�",
-          Ignored: {}
-        }
+          Ignored: {},
+        },
       });
 
       assert.equal(myMap.fmap.get("SafeString"), "Whatever");
@@ -30,14 +30,14 @@ describe("SweatMap", function() {
       assert.equal(myMap.rmap.get("�"), "☃");
     });
 
-    it("Can pass in adjusted character ranges:", function() {
+    it("Can pass in adjusted character ranges:", function () {
       var myMap = new SweatMap({
         additional_ranges: {
           "A-P": { start: "41", end: "50" }, //Add A-Z
           "A-Z": { start: "41", end: "5A" }, //Any non-unique chars are filtered out!
           "a-z": { start: "61", end: "7A" }, //Add a-z
-          "Basic Latin": { end: null } //Removes Basic Latin
-        }
+          "Basic Latin": { end: null }, //Removes Basic Latin
+        },
       });
 
       assert.equal(myMap.characters["1"].length, 52);
@@ -45,7 +45,7 @@ describe("SweatMap", function() {
       assert.equal(myMap.characters["3"].length, 57440);
     });
 
-    it("Character ranges are frozen:", function() {
+    it("Character ranges are frozen:", function () {
       var myMap = new SweatMap();
 
       assert.equal(Object.isFrozen(myMap.characters), true);
@@ -54,28 +54,28 @@ describe("SweatMap", function() {
       assert.equal(Object.isFrozen(myMap.characters["3"]), true);
     });
 
-    it("No default entries:", function() {
+    it("No default entries:", function () {
       var myMap = new SweatMap();
 
       assert.deepEqual(myMap.fmap.entries().next(), {
         value: undefined,
-        done: true
+        done: true,
       });
       assert.deepEqual(myMap.rmap.entries().next(), {
         value: undefined,
-        done: true
+        done: true,
       });
     });
 
-    it("Can set CSS Safe Mode:", function() {
+    it("Can set CSS Safe Mode:", function () {
       var myMap = new SweatMap({ cssSafe: true });
 
       assert.equal(myMap.cssSafe, true);
     });
   });
 
-  describe("bytes(str)", function() {
-    it("Returns bytes for a given string:", function() {
+  describe("bytes(str)", function () {
+    it("Returns bytes for a given string:", function () {
       var myMap = new SweatMap();
 
       assert.equal(myMap.bytes("a"), 1);
@@ -87,8 +87,8 @@ describe("SweatMap", function() {
     });
   });
 
-  describe("size(str)", function() {
-    it("Returns size of map:", function() {
+  describe("size(str)", function () {
+    it("Returns size of map:", function () {
       var myMap = new SweatMap();
 
       assert.equal(myMap.size(), 0);
@@ -101,8 +101,8 @@ describe("SweatMap", function() {
     });
   });
 
-  describe("cssSafeString(str)", function() {
-    it("Determines if a string is a valid css identifier (e.g. class/id):", function() {
+  describe("cssSafeString(str)", function () {
+    it("Determines if a string is a valid css identifier (e.g. class/id):", function () {
       var myMap = new SweatMap();
 
       assert.equal(myMap.cssSafeString("a"), true);
@@ -117,9 +117,9 @@ describe("SweatMap", function() {
     });
   });
 
-  describe("generatePatternForBytes(bytes)", function() {
+  describe("generatePatternForBytes(bytes)", function () {
     var myMap;
-    var patternCountTest = function(bytes) {
+    var patternCountTest = function (bytes) {
       var expectedPatterns = Math.pow(2, bytes - 1);
       var patterns = myMap.generatePatternForBytes(bytes);
       var patternCount = 0;
@@ -137,58 +137,58 @@ describe("SweatMap", function() {
       assert.equal(patternCount, expectedPatterns);
     };
 
-    beforeEach(function() {
+    beforeEach(function () {
       myMap = new SweatMap({
         additional_ranges: {
           "A-Z": { start: "41", end: "5A" }, //Add A-Z
           "a-z": { start: "61", end: "7A" }, //Add a-z
-          "Basic Latin": { end: null } //Removes Basic Latin
-        }
+          "Basic Latin": { end: null }, //Removes Basic Latin
+        },
       });
     });
 
-    it("Should generate proper number of patterns for 1 bytes", function() {
+    it("Should generate proper number of patterns for 1 bytes", function () {
       patternCountTest(1);
     });
 
-    it("Should generate proper number of patterns for 2 bytes", function() {
+    it("Should generate proper number of patterns for 2 bytes", function () {
       patternCountTest(2);
     });
 
-    it("Should generate proper number of patterns for 3 bytes", function() {
+    it("Should generate proper number of patterns for 3 bytes", function () {
       patternCountTest(3);
     });
 
-    it("Should generate proper number of patterns for 4 bytes", function() {
+    it("Should generate proper number of patterns for 4 bytes", function () {
       patternCountTest(4);
     });
 
-    it("Should generate proper number of patterns for 5 bytes", function() {
+    it("Should generate proper number of patterns for 5 bytes", function () {
       patternCountTest(5);
     });
   });
 
-  describe("set(key)", function() {
+  describe("set(key)", function () {
     var myMap;
 
-    beforeEach(function() {
+    beforeEach(function () {
       myMap = new SweatMap({
         additional_ranges: {
           "A-Z": { start: "41", end: "5A" }, //Add A-Z
           "a-z": { start: "61", end: "7A" }, //Add a-z
-          "Basic Latin": { end: null } //Removes Basic Latin
-        }
+          "Basic Latin": { end: null }, //Removes Basic Latin
+        },
       });
     });
 
-    it("Returns the same obfuscated value given the same key:", function() {
+    it("Returns the same obfuscated value given the same key:", function () {
       var str1 = myMap.set("string");
       var str2 = myMap.set("string");
 
       assert.equal(str1, str2);
     });
 
-    it("Returns an error if the key is not a string:", function() {
+    it("Returns an error if the key is not a string:", function () {
       assert.throws(
         () => {
           myMap.set({});
@@ -212,7 +212,7 @@ describe("SweatMap", function() {
       );
       assert.throws(
         () => {
-          myMap.set(function() {});
+          myMap.set(function () {});
         },
         Error,
         "function(){} is not a string"
@@ -233,7 +233,7 @@ describe("SweatMap", function() {
       );
     });
 
-    it("Returns an error if the key is an empty string:", function() {
+    it("Returns an error if the key is an empty string:", function () {
       assert.throws(
         () => {
           myMap.set("");
@@ -243,7 +243,7 @@ describe("SweatMap", function() {
       );
     });
 
-    it("Obfuscates the given keys correctly:", function() {
+    it("Obfuscates the given keys correctly:", function () {
       //LONG Timeout -> 1min
       this.timeout(60000);
 
@@ -269,7 +269,7 @@ describe("SweatMap", function() {
       }
     });
 
-    it("Obfuscates the given keys correctly (CSS Safe):", function() {
+    it("Obfuscates the given keys correctly (CSS Safe):", function () {
       //LONG Timeout -> 1min
       this.timeout(60000);
 
@@ -298,8 +298,8 @@ describe("SweatMap", function() {
     });
   });
 
-  describe("delete(key)", function() {
-    it("Deletes values from both fmap and rmap for a given key:", function() {
+  describe("delete(key)", function () {
+    it("Deletes values from both fmap and rmap for a given key:", function () {
       var myMap = new SweatMap();
 
       var astr = myMap.set("A-String");
@@ -324,8 +324,8 @@ describe("SweatMap", function() {
     });
   });
 
-  describe("clear()", function() {
-    it("Clears values from both fmap and rmap:", function() {
+  describe("clear()", function () {
+    it("Clears values from both fmap and rmap:", function () {
       var myMap = new SweatMap();
 
       var astr = myMap.set("A-String");
@@ -344,8 +344,8 @@ describe("SweatMap", function() {
     });
   });
 
-  describe("entries()", function() {
-    it("Returns a new Iterator object that contains an array of [key, value] for each element in the Map object in insertion order:", function() {
+  describe("entries()", function () {
+    it("Returns a new Iterator object that contains an array of [key, value] for each element in the Map object in insertion order:", function () {
       var myMap = new SweatMap();
 
       myMap.set("A-String");
@@ -355,8 +355,8 @@ describe("SweatMap", function() {
     });
   });
 
-  describe("get(key)", function() {
-    it("Get values from the map:", function() {
+  describe("get(key)", function () {
+    it("Get values from the map:", function () {
       var myMap = new SweatMap();
 
       var astr = myMap.set("A-String");
@@ -366,8 +366,8 @@ describe("SweatMap", function() {
     });
   });
 
-  describe("get_obfuscated(value)", function() {
-    it("Get keys from the map:", function() {
+  describe("get_obfuscated(value)", function () {
+    it("Get keys from the map:", function () {
       var myMap = new SweatMap();
 
       var astr = myMap.set("A-String");
@@ -377,8 +377,8 @@ describe("SweatMap", function() {
     });
   });
 
-  describe("has(key)", function() {
-    it("Can see if it has a key in the map:", function() {
+  describe("has(key)", function () {
+    it("Can see if it has a key in the map:", function () {
       var myMap = new SweatMap();
 
       myMap.set("A-String");
@@ -389,8 +389,8 @@ describe("SweatMap", function() {
     });
   });
 
-  describe("has_obfuscated(value)", function() {
-    it("Can see if it has a value in the map:", function() {
+  describe("has_obfuscated(value)", function () {
+    it("Can see if it has a value in the map:", function () {
       var myMap = new SweatMap();
 
       var astr = myMap.set("A-String");

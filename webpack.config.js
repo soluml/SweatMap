@@ -7,19 +7,19 @@ module.exports = {
   mode: "production",
   target: "web",
   entry: {
-    sweatmap: path.resolve(__dirname, "node", "sweatmap.js")
+    sweatmap: path.resolve(__dirname, "node", "sweatmap.js"),
   },
   output: {
     path: path.resolve(__dirname, "browser"),
-    filename: "[name]-" + packageJSON.version + ".min.js"
+    filename: "[name]-" + packageJSON.version + ".min.js",
   },
   module: {
     rules: [
       {
         include: path.resolve(__dirname, "node", "sweatmap.js"),
-        loader: "babel-loader"
-      }
-    ]
+        loader: "babel-loader",
+      },
+    ],
   },
   optimization: {
     minimize: true,
@@ -28,16 +28,16 @@ module.exports = {
         terserOptions: {
           compress: {
             drop_console: true,
-            drop_debugger: true
+            drop_debugger: true,
           },
           output: {
-            comments: false
+            comments: false,
           },
           mangle: true,
-          ie8: false
-        }
-      })
-    ]
+          ie8: false,
+        },
+      }),
+    ],
   },
-  node: { fs: "empty" }
+  node: { fs: "empty" },
 };
