@@ -20,8 +20,5 @@
     "mocha": true
   },
   "extends": "eslint:recommended",
-  "ecmaFeatures": {
-    "experimentalObjectRestSpread": true
-  },
   "plugins": []
 }
