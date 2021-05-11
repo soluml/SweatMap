@@ -30,7 +30,7 @@
   },
   "scripts": {
     "start": "NODE_ENV=production webpack",
-    "pretest": "eslint node/**/*.js test/**/*.js",
+    "lint": "eslint node/**/*.js test/**/*.js",
     "test": "mocha"
   },
   "babel": {
