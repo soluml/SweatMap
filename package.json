@@ -20,10 +20,16 @@
     "css"
   ],
   "type": "module",
-  "main": "src/sweatmap.js",
-  "exports": "./src/sweatmap.js",
+  "main": "dist/sweatmap.js",
+  "exports": {
+    ".": {
+      "types": "./dist/sweatmap.d.ts",
+      "default": "./dist/sweatmap.js"
+    }
+  },
+  "types": "dist/sweatmap.d.ts",
   "files": [
-    "src"
+    "dist"
   ],
   "readmeFilename": "README.md",
   "engines": {
@@ -34,11 +40,17 @@
     "url": "git://github.com/soluml/sweatmap.git"
   },
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
     "lint": "eslint src test",
-    "test": "node --test test/test.js"
+    "typecheck": "tsc",
+    "test": "node --test test/test.ts",
+    "prepack": "npm run build"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "eslint": "^10.13.0"
+    "@types/node": "^26.6.5",
+    "eslint": "^10.13.0",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.0"
   }
 }

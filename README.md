@@ -14,7 +14,7 @@ The motivation behind SweatMap was to take semantic CSS Identifiers (e.g. for se
 
 ## How to use
 
-SweatMap is a single dependency-free ES module with no build step, so the same file works in Node and in the browser.
+SweatMap is a single dependency-free ES module, so the same file works in Node and in the browser.
 
 **Node (ESM):**
 
@@ -32,7 +32,7 @@ const SweatMap = require("sweatmap");
 
 ```html
 <script type="module">
-  import SweatMap from "./node_modules/sweatmap/src/sweatmap.js";
+  import SweatMap from "./node_modules/sweatmap/dist/sweatmap.js";
 </script>
 ```
 
@@ -44,7 +44,7 @@ const myMap = new SweatMap({ cssSafe: true });
 myMap.set("my-semantic-class-name"); // "A"
 ```
 
-Requires Node `^20.19.0 || >=22.12.0` or any modern browser.
+Requires Node `^20.19.0 || >=22.12.0` or any modern browser. TypeScript types are included.
 
 - **Constructor(obj):**
 
@@ -65,3 +65,11 @@ Requires Node `^20.19.0 || >=22.12.0` or any modern browser.
 - **get_obfuscated(value):** Returns the key for a given value.
 - **has(key):** Returns true/false if a key exists in the map.
 - **has_obfuscated(value):** Returns true/false if a value exists in the map.
+
+## Development
+
+The source is TypeScript in `src/`. Node runs it directly (`^22.18.0 || >=23.6.0`, for built-in type stripping), so tests need no build step.
+
+- `npm test` runs the tests.
+- `npm run typecheck` and `npm run lint` check the source and tests.
+- `npm run build` compiles `src/` to `dist/` (JavaScript and type declarations). It runs automatically on `npm pack` and `npm publish`.

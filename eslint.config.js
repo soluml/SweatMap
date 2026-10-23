@@ -1,20 +1,27 @@
 import js from "@eslint/js";
+import tseslint from "typescript-eslint";
 
-export default [
+export default tseslint.config(
   js.configs.recommended,
+  tseslint.configs.strictTypeChecked,
   {
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname
+      }
+    },
     rules: {
-      indent: [
-        1,
-        2,
+      semi: [2, "always"],
+      //node:test's describe() and it() return promises that the runner tracks itself
+      "@typescript-eslint/no-floating-promises": [
+        "error",
         {
-          SwitchCase: 1,
-          VariableDeclarator: { var: 1, let: 1, const: 1 }
+          allowForKnownSafeCalls: [
+            { from: "package", package: "node:test", name: ["describe", "it"] }
+          ]
         }
-      ],
-      quotes: 0,
-      "no-console": 0,
-      semi: [2, "always"]
+      ]
     }
   }
-];
+);
