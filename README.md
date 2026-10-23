@@ -1,8 +1,11 @@
 # SweatMap
 
 [![npm version](https://badge.fury.io/js/sweatmap.svg)](http://badge.fury.io/js/sweatmap)
+[![zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](package.json)
 
 Take in a series of UTF-8 strings and map them to UTF-8 strings that are as small as possible while still being unique.
+
+**Zero dependencies.** Installing SweatMap adds nothing else to your `node_modules`.
 
 ### Why?
 
