@@ -1,6 +1,6 @@
 {
   "name": "sweatmap",
-  "version": "0.3.7",
+  "version": "0.4.0",
   "description": "SweatMap takes in a series of UTF-8 strings and maps them to UTF-8 strings that are as small as possible while still being unique.",
   "keywords": [
     "css",
