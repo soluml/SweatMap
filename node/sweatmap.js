@@ -1,8 +1,5 @@
 "use strict";
 
-const uniq = require("lodash/uniqWith");
-const isEqual = require("lodash/isEqual");
-
 const SweatMap = class SweatMap {
   constructor(obj) {
     obj = typeof obj == "object" ? obj : {};
@@ -175,7 +172,7 @@ const SweatMap = class SweatMap {
 
     //Removes duplicate chars in the array then freeze to ensure nothing is changed
     Object.keys(this.characters).forEach(C => {
-      this.characters[C] = uniq(this.characters[C]);
+      this.characters[C] = Array.from(new Set(this.characters[C]));
       Object.freeze(this.characters[C]);
     });
 
@@ -236,7 +233,12 @@ const SweatMap = class SweatMap {
       return possibleSums;
     };
 
-    return uniq(calculateSumCombinations(bytes), isEqual).map(pattern =>
+    //Remove duplicate patterns, keeping the first occurrence of each
+    const uniquePatterns = new Map(
+      calculateSumCombinations(bytes).map(pattern => [pattern.join(), pattern])
+    );
+
+    return Array.from(uniquePatterns.values()).map(pattern =>
       pattern.map(val => this.characters[`${val}`])
     );
   }

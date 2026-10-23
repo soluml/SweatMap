@@ -1,6 +1,7 @@
 "use strict";
 
-var assert = require("assert");
+const { describe, it, beforeEach } = require("node:test");
+const assert = require("node:assert");
 var SweatMap = require("../node/sweatmap.js");
 
 describe("SweatMap", function () {
@@ -243,10 +244,7 @@ describe("SweatMap", function () {
       );
     });
 
-    it("Obfuscates the given keys correctly:", function () {
-      //LONG Timeout -> 1min
-      this.timeout(60000);
-
+    it("Obfuscates the given keys correctly:", { timeout: 60000 }, function () {
       var i, str;
 
       assert.equal(myMap.characters["1"].length, 52);
@@ -269,10 +267,7 @@ describe("SweatMap", function () {
       }
     });
 
-    it("Obfuscates the given keys correctly (CSS Safe):", function () {
-      //LONG Timeout -> 1min
-      this.timeout(60000);
-
+    it("Obfuscates the given keys correctly (CSS Safe):", { timeout: 60000 }, function () {
       var i,
         str,
         myOtherMap = new SweatMap({ cssSafe: true });

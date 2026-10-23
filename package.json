@@ -31,7 +31,7 @@
   "scripts": {
     "start": "NODE_ENV=production webpack",
     "lint": "eslint node/**/*.js test/**/*.js",
-    "test": "mocha"
+    "test": "node --test test/test.js"
   },
   "babel": {
     "presets": [
@@ -43,15 +43,11 @@
     "not dead",
     "ie 11"
   ],
-  "dependencies": {
-    "lodash": "4.17.21"
-  },
   "devDependencies": {
     "@babel/core": "^7.14.0",
     "@babel/preset-env": "^7.14.1",
     "babel-loader": "^8.2.2",
     "eslint": "^7.26.0",
-    "mocha": "^10.0.0",
     "terser-webpack-plugin": "^5.1.1",
     "webpack": "^5.37.0",
     "webpack-cli": "^4.7.0"
