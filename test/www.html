@@ -1,22 +1,24 @@
 <!doctype html>
-<html class="no-js" lang="">
+<html lang="en">
     <head>
         <meta charset="utf-8">
-        <meta http-equiv="x-ua-compatible" content="ie=edge">
-        <title></title>
-        <meta name="description" content="">
+        <title>SweatMap</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <script src="../browser/sweatmap.js"></script>
     </head>
     <body>
-        <script>
-            var myMap = new SweatMap({"cssSafe": true});
+        <pre id="output"></pre>
+        <script type="module">
+            import SweatMap from "../src/sweatmap.js";
 
-            for(i = 0; i < 2800; i++) {
-                str = myMap.set('string'+ i);
+            const myMap = new SweatMap({ cssSafe: true });
+            const lines = [];
 
-                console.log(i, str);
+            for (let i = 0; i < 2800; i++) {
+                lines.push(i + " " + myMap.set("string" + i));
             }
+
+            console.log(lines.join("\n"));
+            document.getElementById("output").textContent = lines.join("\n");
         </script>
     </body>
 </html>

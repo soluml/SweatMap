@@ -1,8 +1,6 @@
-"use strict";
-
-const { describe, it, beforeEach } = require("node:test");
-const assert = require("node:assert");
-var SweatMap = require("../node/sweatmap.js");
+import { describe, it, beforeEach } from "node:test";
+import assert from "node:assert";
+import SweatMap from "../src/sweatmap.js";
 
 describe("SweatMap", function () {
   describe("#constructor(existing_strings, additional_ranges)", function () {
@@ -130,7 +128,7 @@ describe("SweatMap", function () {
           if (patterns[i].length > 0) {
             patternCount++;
           }
-        } catch (err) {
+        } catch {
           break;
         }
       }

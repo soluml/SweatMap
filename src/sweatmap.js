@@ -1,6 +1,4 @@
-"use strict";
-
-const SweatMap = class SweatMap {
+export default class SweatMap {
   constructor(obj) {
     obj = typeof obj == "object" ? obj : {};
 
@@ -164,7 +162,7 @@ const SweatMap = class SweatMap {
           if (!this.characters[bytes]) this.characters[bytes] = [];
 
           this.characters[bytes].push(char);
-        } catch (e) {
+        } catch {
           //Character contains lone surrogates, should be avoided -> https://mathiasbynens.be/notes/javascript-unicode
         }
       }
@@ -361,10 +359,7 @@ const SweatMap = class SweatMap {
 
     return this.rmap.has(value);
   }
-};
+}
 
-//Export SweatMap for Browsers ...
-if (typeof window === "object") window.SweatMap = SweatMap;
-
-//... and CommonJS
-if (typeof module === "object" && module.exports) module.exports = SweatMap;
+//Lets CommonJS consumers keep using `const SweatMap = require("sweatmap")`
+export { SweatMap as "module.exports" };

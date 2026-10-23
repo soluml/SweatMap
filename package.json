@@ -19,37 +19,26 @@
     "optimize",
     "css"
   ],
-  "main": "node/sweatmap.js",
+  "type": "module",
+  "main": "src/sweatmap.js",
+  "exports": "./src/sweatmap.js",
+  "files": [
+    "src"
+  ],
   "readmeFilename": "README.md",
   "engines": {
-    "node": ">=8.16.0"
+    "node": "^20.19.0 || >=22.12.0"
   },
   "repository": {
     "type": "git",
     "url": "git://github.com/soluml/sweatmap.git"
   },
   "scripts": {
-    "start": "NODE_ENV=production webpack",
-    "lint": "eslint node/**/*.js test/**/*.js",
+    "lint": "eslint src test",
     "test": "node --test test/test.js"
   },
-  "babel": {
-    "presets": [
-      "@babel/preset-env"
-    ]
-  },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "ie 11"
-  ],
   "devDependencies": {
-    "@babel/core": "^7.14.0",
-    "@babel/preset-env": "^7.14.1",
-    "babel-loader": "^8.2.2",
-    "eslint": "^7.26.0",
-    "terser-webpack-plugin": "^5.1.1",
-    "webpack": "^5.37.0",
-    "webpack-cli": "^4.7.0"
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.13.0"
   }
 }
