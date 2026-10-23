@@ -85,7 +85,7 @@ const DEFAULT_RANGES: Readonly<Record<string, CharacterRange>> = {
   "Currency Symbols": { start: "20A0", end: "20CF" },
   "Combining Diacritical Marks for Symbols": {
     start: "20D0",
-    end: "20FF"
+    end: "20FF",
   },
   "Letterlike Symbols": { start: "2100", end: "214F" },
   "Number Forms": { start: "2150", end: "218F" },
@@ -139,7 +139,7 @@ const DEFAULT_RANGES: Readonly<Record<string, CharacterRange>> = {
   "Small Form Variants": { start: "FE50", end: "FE6F" },
   "Arabic Presentation Forms-B": { start: "FE70", end: "FEFF" },
   "Halfwidth and Fullwidth Forms": { start: "FF00", end: "FFEF" },
-  Specials: { start: "FFF0", end: "FFFF" }
+  Specials: { start: "FFF0", end: "FFFF" },
 };
 
 /**
@@ -171,8 +171,7 @@ export default class SweatMap {
     const ranges = { ...DEFAULT_RANGES, ...options.additional_ranges };
 
     //Add existing strings to map. Values are checked at runtime for JavaScript callers.
-    const existingStrings: Readonly<Record<string, unknown>> =
-      options.existing_strings ?? {};
+    const existingStrings: Readonly<Record<string, unknown>> = options.existing_strings ?? {};
 
     for (const [key, value] of Object.entries(existingStrings)) {
       if (typeof value == "string") {
@@ -203,7 +202,7 @@ export default class SweatMap {
 
     //Removes duplicate chars in the array
     this.#characters = new Map(
-      Array.from(characters, ([bytes, chars]) => [bytes, Array.from(new Set(chars))])
+      Array.from(characters, ([bytes, chars]) => [bytes, Array.from(new Set(chars))]),
     );
   }
 
@@ -260,17 +259,13 @@ export default class SweatMap {
       let subset: number[] = [];
 
       // Our subset sum function for finding possible sums combinations for our target value
-      const subsetSum = (
-        subset: number[],
-        target: number,
-        partial: number[] = []
-      ): void => {
+      const subsetSum = (subset: number[], target: number, partial: number[] = []): void => {
         const s = partial.reduce((a, b) => a + b, 0);
 
         if (s === target) possibleSums.push(partial);
         else if (s >= target) return;
 
-        subset.forEach(num => {
+        subset.forEach((num) => {
           subsetSum(subset.slice(1), target, partial.concat(num));
         });
       };
@@ -289,17 +284,16 @@ export default class SweatMap {
 
     //Remove duplicate patterns, keeping the first occurrence of each
     const uniquePatterns = new Map(
-      calculateSumCombinations(bytes).map(pattern => [pattern.join(), pattern])
+      calculateSumCombinations(bytes).map((pattern) => [pattern.join(), pattern]),
     );
 
     const patterns: (readonly string[])[][] = [];
 
     for (const pattern of uniquePatterns.values()) {
-      const charlists = pattern.map(val => this.#characters.get(val));
+      const charlists = pattern.map((val) => this.#characters.get(val));
 
       //Skip patterns that need a byte length with no available characters
-      if (charlists.every(charlist => charlist !== undefined))
-        patterns.push(charlists);
+      if (charlists.every((charlist) => charlist !== undefined)) patterns.push(charlists);
     }
 
     return patterns;
@@ -323,8 +317,7 @@ export default class SweatMap {
 
     //Empty values are never good, since has_obfuscated("") is true
     const isGoodValue = (value: string): boolean =>
-      !this.has_obfuscated(value) &&
-      (!this.#cssSafe || this.cssSafeString(value));
+      !this.has_obfuscated(value) && (!this.#cssSafe || this.cssSafeString(value));
 
     let bytes = 0; //Determines what patterns to try
     let value = ""; //The obfuscated UTF-8 String
@@ -341,9 +334,7 @@ export default class SweatMap {
         const currentPatternCounters = currentPattern.map(() => 0);
 
         //Last possible match
-        const lastMatch = currentPattern
-          .map(charlist => charlist.at(-1))
-          .join("");
+        const lastMatch = currentPattern.map((charlist) => charlist.at(-1)).join("");
 
         //Loop through the all charlists trying all combinations before giving up.
         while (!isGoodValue(value) && lastMatch !== value) {
@@ -361,10 +352,7 @@ export default class SweatMap {
             //If the current counter is less than or equal to the total number of chars in this charlist, you don't need to increment anymore
             if (counter <= charlist.length) {
               //If it's equal and there are more charlists
-              if (
-                counter === charlist.length &&
-                i < currentPattern.length - 1
-              ) {
+              if (counter === charlist.length && i < currentPattern.length - 1) {
                 currentPatternCounters[i] = 0;
                 continue;
               }

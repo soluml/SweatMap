@@ -204,7 +204,7 @@ describe("SweatMap", function () {
             myMap.set(key);
           },
           Error,
-          `${inspect(key)} is not a string`
+          `${inspect(key)} is not a string`,
         );
       }
     });
@@ -215,7 +215,7 @@ describe("SweatMap", function () {
           myMap.set("");
         },
         Error,
-        '"" is an empty string'
+        '"" is an empty string',
       );
     });
 
@@ -294,7 +294,7 @@ describe("SweatMap", function () {
         [
           ["A-String", astr],
           ["B-String", bstr],
-        ]
+        ],
       );
     });
   });

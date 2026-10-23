@@ -1,24 +1,24 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>SweatMap</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-    </head>
-    <body>
-        <pre id="output"></pre>
-        <script type="module">
-            import SweatMap from "../dist/sweatmap.js"; //Run `npm run build` first
+  <head>
+    <meta charset="utf-8" />
+    <title>SweatMap</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <pre id="output"></pre>
+    <script type="module">
+      import SweatMap from "../dist/sweatmap.js"; //Run `npm run build` first
 
-            const myMap = new SweatMap({ cssSafe: true });
-            const lines = [];
+      const myMap = new SweatMap({ cssSafe: true });
+      const lines = [];
 
-            for (let i = 0; i < 2800; i++) {
-                lines.push(i + " " + myMap.set("string" + i));
-            }
+      for (let i = 0; i < 2800; i++) {
+        lines.push(i + " " + myMap.set("string" + i));
+      }
 
-            console.log(lines.join("\n"));
-            document.getElementById("output").textContent = lines.join("\n");
-        </script>
-    </body>
+      console.log(lines.join("\n"));
+      document.getElementById("output").textContent = lines.join("\n");
+    </script>
+  </body>
 </html>

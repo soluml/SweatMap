@@ -71,5 +71,6 @@ Requires Node `^20.19.0 || >=22.12.0` or any modern browser. TypeScript types ar
 The source is TypeScript in `src/`. Node runs it directly (`^22.18.0 || >=23.6.0`, for built-in type stripping), so tests need no build step.
 
 - `npm test` runs the tests.
-- `npm run typecheck` and `npm run lint` check the source and tests.
+- `npm run typecheck` and `npm run lint` check the source and tests. Linting uses [Oxlint](https://oxc.rs/docs/guide/usage/linter) with type-aware rules.
+- `npm run format` formats everything with [Oxfmt](https://oxc.rs/docs/guide/usage/formatter); `npm run format:check` verifies it.
 - `npm run build` compiles `src/` to `dist/` (JavaScript and type declarations). It runs automatically on `npm pack` and `npm publish`.
