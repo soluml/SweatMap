@@ -142,6 +142,50 @@ const DEFAULT_RANGES: Readonly<Record<string, CharacterRange>> = {
   Specials: { start: "FFF0", end: "FFFF" },
 };
 
+//Code points that take each number of bytes in UTF-8, within the 16-bit range String.fromCharCode() covers
+const UTF8_BYTE_RANGES: ReadonlyMap<number, readonly [number, number]> = new Map([
+  [1, [0x0000, 0x007f]],
+  [2, [0x0080, 0x07ff]],
+  [3, [0x0800, 0xffff]],
+]);
+
+//https://www.w3.org/TR/CSS2/syndata.html#characters
+//Can't start with a digit, "--" or "-" and a digit, or be just "-"
+//Does not yet work with escaped characters or ISO 10646 characters as a numeric code
+const CSS_IDENTIFIER = /^(?!-?[0-9]|--|-$)[-_a-zA-Z0-9\u00A0-\uFFFF]+$/;
+
+//A single character that can appear somewhere in a CSS identifier
+const CSS_CHARACTER = /^[-_a-zA-Z0-9\u00A0-\uFFFF]$/;
+
+const isLowSurrogate = (code: number): boolean => code >= 0xdc00 && code <= 0xdfff;
+
+//Character lists built from the default ranges, shared by every instance that doesn't add its own
+const defaultCharlists = new Map<number, string>();
+const defaultCssSafeCharlists = new Map<number, string>();
+
+const compositionsCache = new Map<number, readonly (readonly number[])[]>();
+
+//Every way to split a byte length into per-character byte lengths of 1-3, in order,
+//e.g. 3 -> [1, 1, 1], [1, 2], [2, 1], [3]
+const compositions = (bytes: number): readonly (readonly number[])[] => {
+  if (bytes === 0) return [[]];
+
+  let cached = compositionsCache.get(bytes);
+
+  if (cached === undefined) {
+    const result: number[][] = [];
+
+    for (let first = 1; first <= Math.min(bytes, 3); first++) {
+      for (const rest of compositions(bytes - first)) result.push([first, ...rest]);
+    }
+
+    cached = result;
+    compositionsCache.set(bytes, cached);
+  }
+
+  return cached;
+};
+
 /**
  * Maps strings to UTF-8 strings that are as small as possible while still
  * being unique, e.g. for shortening CSS class names at build time.
@@ -153,7 +197,6 @@ const DEFAULT_RANGES: Readonly<Record<string, CharacterRange>> = {
  */
 export default class SweatMap {
   //Adhere to CSS class/id rules -> https://www.w3.org/TR/CSS2/syndata.html#characters
-  //Does not yet work with escaped characters or ISO 10646 characters as a numeric code
   readonly #cssSafe: boolean;
 
   //Map containing original string to obfuscated string values
@@ -162,13 +205,25 @@ export default class SweatMap {
   //Map containing obfuscated string to original string values
   readonly #rmap = new Map<string, string>();
 
-  //Available characters keyed by number of bytes
-  readonly #characters: ReadonlyMap<number, readonly string[]>;
+  //Character ranges as [start, end] code points
+  readonly #ranges: readonly (readonly [number, number])[];
+
+  //Available characters keyed by number of bytes, each list as one string. Built when first needed.
+  readonly #charlists: Map<number, string>;
+
+  //Where the search for the next value continues from. Restarted by delete() and clear() so freed values are reused.
+  #candidates: Iterator<string, never>;
 
   constructor(options: SweatMapOptions = {}) {
     this.#cssSafe = options.cssSafe ?? false;
 
-    const ranges = { ...DEFAULT_RANGES, ...options.additional_ranges };
+    this.#ranges = Object.values({ ...DEFAULT_RANGES, ...options.additional_ranges }).flatMap(
+      ({ start, end }) =>
+        start == null || end == null ? [] : [[parseInt(start, 16), parseInt(end, 16)] as const],
+    );
+
+    if (options.additional_ranges) this.#charlists = new Map();
+    else this.#charlists = this.#cssSafe ? defaultCssSafeCharlists : defaultCharlists;
 
     //Add existing strings to map. Values are checked at runtime for JavaScript callers.
     const existingStrings: Readonly<Record<string, unknown>> = options.existing_strings ?? {};
@@ -180,30 +235,7 @@ export default class SweatMap {
       }
     }
 
-    //Build chars array.
-    const characters = new Map<number, string[]>();
-
-    for (const { start, end } of Object.values(ranges)) {
-      if (start == null || end == null) continue;
-
-      for (let i = parseInt(start, 16); i <= parseInt(end, 16); i++) {
-        try {
-          const char = String.fromCharCode(i);
-          const bytes = this.bytes(char);
-          const chars = characters.get(bytes);
-
-          if (chars) chars.push(char);
-          else characters.set(bytes, [char]);
-        } catch {
-          //Character contains lone surrogates, should be avoided -> https://mathiasbynens.be/notes/javascript-unicode
-        }
-      }
-    }
-
-    //Removes duplicate chars in the array
-    this.#characters = new Map(
-      Array.from(characters, ([bytes, chars]) => [bytes, Array.from(new Set(chars))]),
-    );
+    this.#candidates = this.#generateCandidates();
   }
 
   /**
@@ -220,8 +252,22 @@ export default class SweatMap {
    * @throws {URIError} If `str` contains a lone surrogate.
    */
   bytes(str: string): number {
-    //encodeURI escapes each byte of a non-ASCII character (and "%" itself) as %XX
-    return encodeURI(str).replace(/%[0-9A-F]{2}/g, "%").length;
+    let bytes = 0;
+
+    for (let i = 0; i < str.length; i++) {
+      const code = str.charCodeAt(i);
+
+      if (code < 0x80) bytes += 1;
+      else if (code < 0x800) bytes += 2;
+      else if (code < 0xd800 || code > 0xdfff) bytes += 3;
+      else if (code <= 0xdbff && isLowSurrogate(str.charCodeAt(i + 1))) {
+        //A surrogate pair is one 4 byte character
+        bytes += 4;
+        i++;
+      } else throw new URIError("Lone surrogates can't be encoded as UTF-8.");
+    }
+
+    return bytes;
   }
 
   /**
@@ -230,18 +276,7 @@ export default class SweatMap {
    * Escaped characters are not supported.
    */
   cssSafeString(str: string): boolean {
-    //https://www.w3.org/TR/CSS2/syndata.html#characters
-    //Does not yet work with escaped characters or ISO 10646 characters as a numeric code
-    if (
-      /^[0-9]/.test(str) ||
-      /^--/.test(str) ||
-      /^-[0-9]/.test(str) ||
-      /^-$/.test(str) ||
-      !/^[-_a-zA-Z0-9\u00A0-\uFFFF]+$/.test(str)
-    )
-      return false;
-
-    return true;
+    return CSS_IDENTIFIER.test(str);
   }
 
   /**
@@ -251,52 +286,62 @@ export default class SweatMap {
     return this.#fmap.size && this.#rmap.size;
   }
 
-  //Lists every way to build a value of the given byte length, as one character list per position
-  #generatePatternForBytes(bytes: number): (readonly string[])[][] {
-    // Find all the different possible combinations of sums
-    const calculateSumCombinations = (n: number): number[][] => {
-      const possibleSums: number[][] = [];
-      let subset: number[] = [];
+  //Returns every available character of the given byte length, in range order without duplicates
+  #charlist(bytes: number): string {
+    let charlist = this.#charlists.get(bytes);
 
-      // Our subset sum function for finding possible sums combinations for our target value
-      const subsetSum = (subset: number[], target: number, partial: number[] = []): void => {
-        const s = partial.reduce((a, b) => a + b, 0);
+    if (charlist === undefined) {
+      const chars = new Set<string>();
+      const [min, max] = UTF8_BYTE_RANGES.get(bytes) ?? [1, 0];
 
-        if (s === target) possibleSums.push(partial);
-        else if (s >= target) return;
+      for (const [start, end] of this.#ranges) {
+        for (let i = Math.max(start, min); i <= Math.min(end, max); i++) {
+          //Lone surrogates can't be encoded, should be avoided -> https://mathiasbynens.be/notes/javascript-unicode
+          if (i >= 0xd800 && i <= 0xdfff) continue;
 
-        subset.forEach((num) => {
-          subsetSum(subset.slice(1), target, partial.concat(num));
-        });
-      };
+          const char = String.fromCharCode(i);
 
-      // Create our subset
-      for (let i = 1; i <= n; i++) {
-        // Adding max duplicates of each number to simplify the logic
-        // It also has the benefit of not needing to calculate permutations separately once we remove duplicates
-        subset = subset.concat(new Array<number>(n).fill(i));
+          //In CSS safe mode, any value containing an unsafe character would be rejected anyway
+          if (!this.#cssSafe || CSS_CHARACTER.test(char)) chars.add(char);
+        }
       }
 
-      subsetSum(subset, n);
-
-      return possibleSums;
-    };
-
-    //Remove duplicate patterns, keeping the first occurrence of each
-    const uniquePatterns = new Map(
-      calculateSumCombinations(bytes).map((pattern) => [pattern.join(), pattern]),
-    );
-
-    const patterns: (readonly string[])[][] = [];
-
-    for (const pattern of uniquePatterns.values()) {
-      const charlists = pattern.map((val) => this.#characters.get(val));
-
-      //Skip patterns that need a byte length with no available characters
-      if (charlists.every((charlist) => charlist !== undefined)) patterns.push(charlists);
+      charlist = Array.from(chars).join("");
+      this.#charlists.set(bytes, charlist);
     }
 
-    return patterns;
+    return charlist;
+  }
+
+  //Yields every possible value in the order they should be used: fewest bytes first, then by
+  //pattern of character byte lengths, then with the first character changing fastest
+  *#generateCandidates(): Generator<string, never> {
+    //Checked in order so longer character lists are only built if the shorter ones are empty
+    if (this.#charlist(1) === "" && this.#charlist(2) === "" && this.#charlist(3) === "")
+      throw new Error("SweatMap has no characters to generate values from.");
+
+    for (let bytes = 1; ; bytes++) {
+      for (const pattern of compositions(bytes)) {
+        const charlists = pattern.map((charBytes) => this.#charlist(charBytes));
+
+        //Skip patterns that need a byte length with no available characters
+        if (charlists.includes("")) continue;
+
+        const total = charlists.reduce((count, charlist) => count * charlist.length, 1);
+
+        for (let index = 0; index < total; index++) {
+          let value = "";
+          let rest = index;
+
+          for (const charlist of charlists) {
+            value += charlist.charAt(rest % charlist.length);
+            rest = Math.floor(rest / charlist.length);
+          }
+
+          yield value;
+        }
+      }
+    }
   }
 
   /**
@@ -315,60 +360,17 @@ export default class SweatMap {
     if (typeof (key as unknown) != "string" || key === "")
       throw new Error("SweatMap keys must be strings.");
 
-    //Empty values are never good, since has_obfuscated("") is true
-    const isGoodValue = (value: string): boolean =>
-      !this.has_obfuscated(value) && (!this.#cssSafe || this.cssSafeString(value));
+    //Continue the search from the last value handed out, since every earlier candidate is taken or unsafe
+    for (;;) {
+      const { value } = this.#candidates.next();
 
-    let bytes = 0; //Determines what patterns to try
-    let value = ""; //The obfuscated UTF-8 String
+      if (!this.has_obfuscated(value) && (!this.#cssSafe || this.cssSafeString(value))) {
+        this.#fmap.set(key, value);
+        this.#rmap.set(value, key);
 
-    do {
-      //Increment the bytes to look at new patterns
-      bytes++;
-
-      //Try each possible pattern until a good value is found
-      for (const currentPattern of this.#generatePatternForBytes(bytes)) {
-        if (isGoodValue(value)) break;
-
-        //Array of counters, one for each charlist
-        const currentPatternCounters = currentPattern.map(() => 0);
-
-        //Last possible match
-        const lastMatch = currentPattern.map((charlist) => charlist.at(-1)).join("");
-
-        //Loop through the all charlists trying all combinations before giving up.
-        while (!isGoodValue(value) && lastMatch !== value) {
-          //Take the next character from each charlist
-          value = currentPattern
-            .map((charlist, i) => charlist[currentPatternCounters[i] ?? 0])
-            .join("");
-
-          //Increment Counters
-          for (const [i, charlist] of currentPattern.entries()) {
-            const counter = (currentPatternCounters[i] ?? 0) + 1;
-
-            currentPatternCounters[i] = counter;
-
-            //If the current counter is less than or equal to the total number of chars in this charlist, you don't need to increment anymore
-            if (counter <= charlist.length) {
-              //If it's equal and there are more charlists
-              if (counter === charlist.length && i < currentPattern.length - 1) {
-                currentPatternCounters[i] = 0;
-                continue;
-              }
-
-              break;
-            }
-          }
-        }
+        return value;
       }
-    } while (!isGoodValue(value));
-
-    //Set maps
-    this.#fmap.set(key, value);
-    this.#rmap.set(value, key);
-
-    return value;
+    }
   }
 
   /**
@@ -380,6 +382,7 @@ export default class SweatMap {
     if (value !== undefined) {
       this.#fmap.delete(key);
       this.#rmap.delete(value);
+      this.#candidates = this.#generateCandidates();
     }
   }
 
@@ -389,6 +392,7 @@ export default class SweatMap {
   clear(): void {
     this.#fmap.clear();
     this.#rmap.clear();
+    this.#candidates = this.#generateCandidates();
   }
 
   /**

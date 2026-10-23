@@ -233,6 +233,40 @@ describe("SweatMap", function () {
       //(53)[A]+ (54*64-11{--, -\d})[AA] + (1776)[B] == 5274
       assert.deepEqual(byteLengths(myOtherMap, 5300), { 1: 53, 2: 5221, 3: 26 });
     });
+
+    it("Generates many unique CSS safe values quickly:", { timeout: 5000 }, function () {
+      const myCssSafeMap = new SweatMap({ cssSafe: true });
+      const values = new Set<string>();
+
+      for (let i = 0; i < 100_000; i++) values.add(myCssSafeMap.set(`string${String(i)}`));
+
+      assert.equal(values.size, 100_000);
+      assert.ok([...values].every((value) => myCssSafeMap.cssSafeString(value)));
+    });
+
+    it("Reuses the smallest freed value after delete() and clear():", function () {
+      const myCssSafeMap = new SweatMap({ cssSafe: true });
+
+      assert.equal(myCssSafeMap.set("a"), "A");
+      assert.equal(myCssSafeMap.set("b"), "B");
+      assert.equal(myCssSafeMap.set("c"), "C");
+
+      myCssSafeMap.delete("c");
+      myCssSafeMap.delete("a");
+      assert.equal(myCssSafeMap.set("d"), "A");
+      assert.equal(myCssSafeMap.set("e"), "C");
+      assert.equal(myCssSafeMap.set("f"), "D");
+
+      myCssSafeMap.clear();
+      assert.equal(myCssSafeMap.set("g"), "A");
+    });
+
+    it("Skips values passed in as existing strings:", function () {
+      const myCssSafeMap = new SweatMap({ cssSafe: true, existing_strings: { kept: "B" } });
+
+      assert.equal(myCssSafeMap.set("a"), "A");
+      assert.equal(myCssSafeMap.set("b"), "C");
+    });
   });
 
   describe("delete(key)", function () {
