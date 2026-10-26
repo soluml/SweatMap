@@ -17,7 +17,13 @@ export interface SweatMapOptions {
    */
   cssSafe?: boolean | undefined;
   /**
-   * Character ranges to add to, or override, the defaults, keyed by range name.
+   * Character ranges to use instead of the defaults, keyed by range name.
+   * `additional_ranges` still adds to, or overrides, these.
+   */
+  ranges?: Readonly<Record<string, CharacterRange>> | undefined;
+  /**
+   * Character ranges to add to, or override, the defaults (or `ranges`),
+   * keyed by range name.
    */
   additional_ranges?: Readonly<Record<string, CharacterRange>> | undefined;
   /**
@@ -217,12 +223,14 @@ export default class SweatMap {
   constructor(options: SweatMapOptions = {}) {
     this.#cssSafe = options.cssSafe ?? false;
 
-    this.#ranges = Object.values({ ...DEFAULT_RANGES, ...options.additional_ranges }).flatMap(
-      ({ start, end }) =>
-        start == null || end == null ? [] : [[parseInt(start, 16), parseInt(end, 16)] as const],
+    this.#ranges = Object.values({
+      ...(options.ranges ?? DEFAULT_RANGES),
+      ...options.additional_ranges,
+    }).flatMap(({ start, end }) =>
+      start == null || end == null ? [] : [[parseInt(start, 16), parseInt(end, 16)] as const],
     );
 
-    if (options.additional_ranges) this.#charlists = new Map();
+    if (options.ranges || options.additional_ranges) this.#charlists = new Map();
     else this.#charlists = this.#cssSafe ? defaultCssSafeCharlists : defaultCharlists;
 
     //Add existing strings to map. Values are checked at runtime for JavaScript callers.

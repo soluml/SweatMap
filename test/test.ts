@@ -57,6 +57,28 @@ describe("SweatMap", function () {
       assert.deepEqual(byteLengths(myMap, 53), { 1: 52, 2: 1 });
     });
 
+    it("Can replace the default character ranges:", function () {
+      const myMap = new SweatMap({
+        ranges: {
+          "A-Z": { start: "41", end: "5A" }, //Only A-Z and a-z
+          "a-z": { start: "61", end: "7A" },
+        },
+      });
+
+      //(52)[A] + (52*52)[AA] == 2756, then 3 bytes since no default range is left
+      assert.deepEqual(byteLengths(myMap, 2757), { 1: 52, 2: 2704, 3: 1 });
+    });
+
+    it("Additional ranges add to replaced ranges:", function () {
+      const myMap = new SweatMap({
+        ranges: { "A-Z": { start: "41", end: "5A" } },
+        additional_ranges: { "a-z": { start: "61", end: "7A" }, "A-Z": { end: null } },
+      });
+
+      //Only a-z is left
+      assert.deepEqual(byteLengths(myMap, 27), { 1: 26, 2: 1 });
+    });
+
     it("Skips byte lengths with no available characters:", function () {
       const myMap = new SweatMap({
         additional_ranges: {

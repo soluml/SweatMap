@@ -51,10 +51,11 @@ Requires Node `^20.19.0 || >=22.12.0` or any modern browser. TypeScript types ar
 
 - **Constructor(obj):**
 
-  _Takes in an object with up to three optional properties:_
+  _Takes in an object with up to four optional properties:_
 
   - _cssSafe [default `false`]:_ `true` disallows characters that aren't safe for [CSS Identifiers](https://www.w3.org/TR/CSS2/syndata.html#characters).
-  - _additional_ranges [[`object`](https://github.com/soluml/SweatMap/blob/master/src/sweatmap.js#L19)]:_ An object where the key is a "range name" and the value is an object with a start character point and an end character point. You can set null to either start or end to remove a character range.
+  - _ranges [default: the built-in ranges]:_ An object of character ranges, in the same form as `additional_ranges`, to use instead of the built-in ones. For example, `{ letters: { start: "41", end: "5A" } }` generates values from `A-Z` only.
+  - _additional_ranges [[`object`](https://github.com/soluml/SweatMap/blob/master/src/sweatmap.js#L19)]:_ An object where the key is a "range name" and the value is an object with a start character point and an end character point. You can set null to either start or end to remove a character range. Applied on top of `ranges` when both are given.
   - _existing_strings [default `{}`]:_ Pass in an object of strings that you don't want changed. Key is the original name, value is the name that should be used.
 
 - **bytes(string):** Returns a byte count of the string passed in.
